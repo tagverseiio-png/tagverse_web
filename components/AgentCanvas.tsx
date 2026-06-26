@@ -2,41 +2,38 @@
 
 import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
+import { useMediaResolver } from "./MediaProvider";
 
 const steps = [
   {
     n: "01",
     title: "Discover",
     body: "We audit your brand, market, and competitors to find the gaps worth owning.",
-    img: "/assets/images/home/create-the-agent-1.png",
   },
   {
     n: "02",
     title: "Strategise",
     body: "We build a 90-day growth plan across content, paid, and digital channels.",
-    img: "/assets/images/home/define-policies-1.webp",
   },
   {
     n: "03",
     title: "Create",
     body: "Our studio produces content, ads, and digital assets — built for performance.",
-    img: "/assets/images/home/design-the-logic-1.webp",
   },
   {
     n: "04",
     title: "Launch",
     body: "Campaigns go live with full tracking, pixel setup, and automation in place.",
-    img: "/assets/images/home/test-and-launch-1.webp",
   },
   {
     n: "05",
     title: "Scale",
     body: "We optimise weekly and unlock new channels as data comes in.",
-    img: "/assets/images/home/monitor-and-improve-1.webp",
   },
 ];
 
 export default function AgentCanvas() {
+  const media = useMediaResolver();
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -110,7 +107,7 @@ export default function AgentCanvas() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={s.n}
-                    src={s.img}
+                    src={media(`agentcanvas.${i}`)}
                     alt={s.title}
                     className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
                     style={{ opacity: active === i ? 1 : 0 }}

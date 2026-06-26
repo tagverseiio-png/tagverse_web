@@ -1,24 +1,25 @@
+"use client";
+
 import Reveal from "./Reveal";
+import { useMediaResolver } from "./MediaProvider";
 
 const items = [
   {
     title: "Smart content engine",
     body: "Reels, carousels, and copy built around your ICP and buying triggers",
-    img: "/assets/images/insights/smart-suggestion-layer-1.webp",
   },
   {
     title: "Paid media that converts",
     body: "Meta and Google campaigns managed with AI-assisted optimisation",
-    img: "/assets/images/insights/smart-suggestion-layer-2.webp",
   },
   {
     title: "Automation layer",
     body: "WhatsApp flows, lead nurture, CRM sync — zero manual follow-up",
-    img: "/assets/images/insights/smart-suggestion-layer-3.webp",
   },
 ];
 
 export default function Insights() {
+  const media = useMediaResolver();
   return (
     <section id="growth-os" className="bg-[var(--page-lp)] py-24 text-white md:py-32">
       <div className="container-x">
@@ -46,7 +47,7 @@ export default function Insights() {
             >
               <div className="aspect-[16/10] overflow-hidden border-b border-white/10 bg-white/[0.02]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={it.img} alt={it.title} className="h-full w-full object-cover" />
+                <img src={media(`insights.${i}`)} alt={it.title} className="h-full w-full object-cover" />
               </div>
               <div className="p-6">
                 <h3 className="font-brand text-lg font-medium tracking-tight">{it.title}</h3>

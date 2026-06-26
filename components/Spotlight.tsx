@@ -1,6 +1,11 @@
+"use client";
+
 import Reveal from "./Reveal";
+import { useMedia } from "./MediaProvider";
 
 export default function Spotlight() {
+  const bg = useMedia("spotlight.bg");
+  const headshot = useMedia("spotlight.headshot");
   return (
     <section id="customers" className="bg-white py-24 md:py-32">
       <div className="container-x">
@@ -17,7 +22,7 @@ export default function Spotlight() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/assets/images/home/spotlight-doordash-background.jpg"
+            src={bg}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
           />
@@ -50,7 +55,7 @@ export default function Spotlight() {
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/assets/images/home/spotlight-andy-fang-headshot.webp"
+                    src={headshot}
                     alt="Client"
                     className="h-12 w-12 rounded-full object-cover"
                   />

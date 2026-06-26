@@ -1,6 +1,11 @@
+"use client";
+
 import Reveal from "./Reveal";
+import { useMedia } from "./MediaProvider";
 
 export default function Hallucination() {
+  const video = useMedia("hallucination.video");
+  const poster = useMedia("hallucination.poster");
   return (
     <section id="hallucination" className="relative bg-black pb-24 pt-4 text-white">
       <div className="container-x">
@@ -16,14 +21,15 @@ export default function Hallucination() {
           className="group relative mx-auto mt-12 max-w-4xl overflow-hidden rounded-[20px] border border-white/10"
         >
           <video
+            key={video}
             className="aspect-video w-full object-cover"
             autoPlay
             muted
             loop
             playsInline
-            poster="/hero-home.webp"
+            poster={poster}
           >
-            <source src="/assets/videos/home/hero-hallucinations-preview.mp4" type="video/mp4" />
+            <source src={video} type="video/mp4" />
           </video>
           <button className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-black/50 px-4 py-2 text-sm font-medium backdrop-blur-md transition-colors hover:bg-black/70">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

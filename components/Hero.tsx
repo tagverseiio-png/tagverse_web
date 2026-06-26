@@ -1,5 +1,7 @@
 "use client";
 
+import { useMedia } from "./MediaProvider";
+
 function Arrow() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -9,17 +11,19 @@ function Arrow() {
 }
 
 export default function Hero() {
+  const video = useMedia("hero.video");
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-white text-black">
       {/* ambient video backdrop */}
       <video
+        key={video}
         className="absolute inset-0 h-full w-full object-cover opacity-40"
         autoPlay
         muted
         loop
         playsInline
       >
-        <source src="/assets/videos/home/footer-ambient.mp4" type="video/mp4" />
+        <source src={video} type="video/mp4" />
       </video>
       {/* gradient overlays — mirrors footer but white */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white" />

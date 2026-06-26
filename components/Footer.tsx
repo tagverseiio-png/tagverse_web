@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useMedia } from "./MediaProvider";
 
 const columns = [
   {
@@ -28,17 +31,19 @@ const columns = [
 ];
 
 export default function Footer() {
+  const video = useMedia("footer.video");
   return (
     <footer className="relative bg-black text-white">
       {/* ambient video backdrop */}
       <video
+        key={video}
         className="absolute inset-0 h-full w-full object-cover opacity-40"
         autoPlay
         muted
         loop
         playsInline
       >
-        <source src="/assets/videos/home/footer-ambient.mp4" type="video/mp4" />
+        <source src={video} type="video/mp4" />
       </video>
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black" />
 

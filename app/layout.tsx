@@ -3,6 +3,7 @@ import { Orbitron } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { MediaProvider } from "@/components/MediaProvider";
 
 const orbitron = Orbitron({ subsets: ["latin"], weight: ["600"], variable: "--font-orbitron" });
 
@@ -21,9 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased ${orbitron.variable}`}>
-        <Header />
-        {children}
-        <Footer />
+        <MediaProvider>
+          <Header />
+          {children}
+          <Footer />
+        </MediaProvider>
       </body>
     </html>
   );

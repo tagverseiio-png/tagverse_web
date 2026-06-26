@@ -12,6 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import type { Project } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
+import MediaManager from "./MediaManager";
 
 const PASSCODE = process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
 const SESSION_KEY = "tv_admin_ok";
@@ -98,7 +99,61 @@ export default function AdminPanel() {
     );
   }
 
-  return <Dashboard />;
+  return <AdminShell />;
+}
+
+function AdminShell() {
+  const [tab, setTab] = useState<"projects" | "media">("projects");
+
+  return (
+    <div>
+      <div className="container-x">
+        <div className="inline-flex gap-1 rounded-full border border-line p-1">
+          <TabButton active={tab === "projects"} onClick={() => setTab("projects")}>
+            Projects
+          </TabButton>
+          <TabButton active={tab === "media"} onClick={() => setTab("media")}>
+            Home media
+          </TabButton>
+        </div>
+      </div>
+      <div className="mt-6">
+        {tab === "projects" ? (
+          <Dashboard />
+        ) : (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Home media
+            </h1>
+            <div className="mt-6">
+              <MediaManager />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+        active ? "bg-fg text-white" : "text-muted-fg hover:text-fg"
+      }`}
+    >
+      {children}
+    </button>
+  );
 }
 
 function Dashboard() {

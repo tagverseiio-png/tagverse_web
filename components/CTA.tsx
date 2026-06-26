@@ -1,13 +1,17 @@
+"use client";
+
 import Reveal from "./Reveal";
+import { useMedia } from "./MediaProvider";
 
 export default function CTA() {
+  const bg = useMedia("cta.bg");
   return (
     <section id="contact" className="scroll-mt-24 bg-white pb-8 pt-4">
       <div className="container-x">
         <Reveal className="relative overflow-hidden rounded-[28px] bg-black px-8 py-24 text-center text-white md:px-16 md:py-32">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/hero-home.webp"
+            src={bg}
             alt=""
             className="absolute inset-0 h-full w-full object-cover opacity-30"
           />
