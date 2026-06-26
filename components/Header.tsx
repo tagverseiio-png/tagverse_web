@@ -25,18 +25,16 @@ export default function Header() {
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="container-hero pt-3">
         <div
-          className={`flex h-14 items-center justify-between rounded-full px-3 pl-5 text-white transition-all duration-300 ${
+          className={`flex h-14 items-center justify-between rounded-full px-3 pl-5 transition-all duration-300 ${
             scrolled
-              ? "border border-white/10 bg-black/40 backdrop-blur-xl"
-              : "border border-transparent"
+              ? "border border-white/10 bg-black/40 text-white backdrop-blur-xl"
+              : "border border-transparent text-black"
           }`}
         >
-          <Link href="/" className="flex items-center gap-2 text-[17px] font-medium">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <circle cx="12" cy="12" r="11" fill="currentColor" />
-              <path d="M16 9.5a4.5 4.5 0 1 0 .5 5H12" stroke="var(--bg, #000)" strokeWidth="1.6" fill="none" />
-            </svg>
-            <span className="font-brand tracking-tight">Tagverse</span>
+          <Link href="/" className="flex items-center gap-2">
+            <span className="font-orbitron text-[13px] font-semibold uppercase tracking-[0.08em]">
+              TAGVERSE<span style={{ color: "var(--accent-purple)" }}>.IO</span>
+            </span>
           </Link>
 
           <nav className="hidden items-center gap-7 text-sm md:flex">
@@ -59,7 +57,11 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Link
               href="#contact"
-              className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition-opacity hover:opacity-90"
+              className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                scrolled
+                  ? "border border-white/30 text-white hover:bg-white/10"
+                  : "bg-black text-white hover:opacity-90"
+              }`}
             >
               Book a call
             </Link>

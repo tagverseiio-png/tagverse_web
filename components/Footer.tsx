@@ -29,7 +29,7 @@ const columns = [
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-black text-white">
+    <footer className="relative bg-black text-white">
       {/* ambient video backdrop */}
       <video
         className="absolute inset-0 h-full w-full object-cover opacity-40"
@@ -45,12 +45,10 @@ export default function Footer() {
       <div className="container-x relative pb-12 pt-24">
         <div className="grid gap-12 md:grid-cols-[1.6fr_1fr_1fr_1fr]">
           <div>
-            <Link href="/" className="flex items-center gap-2 text-lg font-medium">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <circle cx="12" cy="12" r="11" fill="currentColor" />
-                <path d="M16 9.5a4.5 4.5 0 1 0 .5 5H12" stroke="#000" strokeWidth="1.6" fill="none" />
-              </svg>
-              <span className="font-brand tracking-tight">Tagverse</span>
+            <Link href="/" className="flex items-center gap-2">
+              <span className="font-orbitron text-[13px] font-semibold uppercase tracking-[0.08em]">
+                TAGVERSE<span style={{ color: "var(--accent-purple-soft)" }}>.IO</span>
+              </span>
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-white/55">
               An AI-first creative studio for ambitious brands — strategy,
@@ -85,11 +83,12 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* oversized wordmark */}
-        <div className="pointer-events-none mt-12 select-none overflow-hidden">
-          <div className="font-display text-[24vw] font-light leading-none tracking-display text-white/[0.04]">
-            Tagverse
-          </div>
+      </div>
+
+      {/* oversized wordmark — full width, outside container */}
+      <div className="pointer-events-none select-none w-full overflow-hidden pb-2">
+        <div className="font-display text-[20vw] font-light leading-none tracking-display text-white/20 text-center whitespace-nowrap">
+          Tagverse
         </div>
       </div>
     </footer>

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Orbitron } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+const orbitron = Orbitron({ subsets: ["latin"], weight: ["600"], variable: "--font-orbitron" });
 
 export const metadata: Metadata = {
   title: "Tagverse",
@@ -17,7 +20,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className={`antialiased ${orbitron.variable}`}>
         <Header />
         {children}
         <Footer />
