@@ -93,7 +93,10 @@ export default function Footer() {
 
       {/* oversized wordmark — full width, outside container */}
       <div className="pointer-events-none select-none w-full overflow-hidden pb-2">
-        <div className="font-display text-[20vw] font-light leading-none tracking-display text-white/20 text-center whitespace-nowrap">
+        <div
+          className="font-display text-[20vw] font-light leading-none tracking-display text-center whitespace-nowrap"
+          style={{ color: "var(--accent-purple-soft)", opacity: 0.45 }}
+        >
           Tagverse
         </div>
       </div>
