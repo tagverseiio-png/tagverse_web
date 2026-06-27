@@ -13,6 +13,8 @@ import { db } from "@/lib/firebase";
 import type { Project } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
 import MediaManager from "./MediaManager";
+import ContentManager from "./ContentManager";
+import LogosManager from "./LogosManager";
 
 const PASSCODE = process.env.NEXT_PUBLIC_ADMIN_PASSCODE;
 const SESSION_KEY = "tv_admin_ok";
@@ -26,6 +28,7 @@ type FormState = {
   title: string;
   category: string;
   year: string;
+  url: string;
   featured: boolean;
   order: string;
   img: string;
@@ -35,6 +38,7 @@ const emptyForm: FormState = {
   title: "",
   category: "",
   year: "",
+  url: "",
   featured: false,
   order: "",
   img: "",
@@ -103,14 +107,22 @@ export default function AdminPanel() {
 }
 
 function AdminShell() {
-  const [tab, setTab] = useState<"projects" | "media">("projects");
+  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media">(
+    "projects",
+  );
 
   return (
     <div>
       <div className="container-x">
-        <div className="inline-flex gap-1 rounded-full border border-line p-1">
+        <div className="inline-flex flex-wrap gap-1 rounded-full border border-line p-1">
           <TabButton active={tab === "projects"} onClick={() => setTab("projects")}>
             Projects
+          </TabButton>
+          <TabButton active={tab === "logos"} onClick={() => setTab("logos")}>
+            Logos
+          </TabButton>
+          <TabButton active={tab === "content"} onClick={() => setTab("content")}>
+            Home content
           </TabButton>
           <TabButton active={tab === "media"} onClick={() => setTab("media")}>
             Home media
@@ -118,9 +130,28 @@ function AdminShell() {
         </div>
       </div>
       <div className="mt-6">
-        {tab === "projects" ? (
-          <Dashboard />
-        ) : (
+        {tab === "projects" && <Dashboard />}
+        {tab === "logos" && (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Trusted-by logos
+            </h1>
+            <div className="mt-6">
+              <LogosManager />
+            </div>
+          </div>
+        )}
+        {tab === "content" && (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Home content
+            </h1>
+            <div className="mt-6">
+              <ContentManager />
+            </div>
+          </div>
+        )}
+        {tab === "media" && (
           <div className="container-x">
             <h1 className="font-brand text-2xl font-medium tracking-tight">
               Home media
@@ -192,6 +223,7 @@ function Dashboard() {
       title: p.title ?? "",
       category: p.category ?? "",
       year: p.year ?? "",
+      url: p.url ?? "",
       featured: !!p.featured,
       order: p.order != null ? String(p.order) : "",
       img: p.img ?? "",
@@ -231,6 +263,7 @@ function Dashboard() {
       title: form.title.trim(),
       category: form.category.trim(),
       year: form.year.trim(),
+      url: form.url.trim(),
       featured: form.featured,
     };
     if (form.order.trim() !== "") payload.order = Number(form.order);
@@ -336,6 +369,20 @@ function Dashboard() {
                   placeholder="2026"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Link URL</label>
+              <input
+                type="url"
+                className={`${inputClass} mt-1.5`}
+                value={form.url}
+                onChange={(e) => setForm((f) => ({ ...f, url: e.target.value }))}
+                placeholder="https://example.com/case-study"
+              />
+              <p className="mt-1 text-[0.7rem] text-muted-fg">
+                Clicking this project opens the link in a new tab. Leave blank to make the card non-clickable.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -471,6 +518,11 @@ function Dashboard() {
                     <p className="truncate text-sm text-muted-fg">
                       {[p.category, p.year].filter(Boolean).join(" · ") || "—"}
                     </p>
+                    {p.url?.trim() && (
+                      <p className="mt-0.5 truncate text-xs text-[var(--accent-purple)]">
+                        ↗ {p.url}
+                      </p>
+                    )}
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <button

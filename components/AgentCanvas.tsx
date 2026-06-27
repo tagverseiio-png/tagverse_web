@@ -3,37 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import Reveal from "./Reveal";
 import { useMediaResolver } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
 
-const steps = [
-  {
-    n: "01",
-    title: "Discover",
-    body: "We audit your brand, market, and competitors to find the gaps worth owning.",
-  },
-  {
-    n: "02",
-    title: "Strategise",
-    body: "We build a 90-day growth plan across content, paid, and digital channels.",
-  },
-  {
-    n: "03",
-    title: "Create",
-    body: "Our studio produces content, ads, and digital assets — built for performance.",
-  },
-  {
-    n: "04",
-    title: "Launch",
-    body: "Campaigns go live with full tracking, pixel setup, and automation in place.",
-  },
-  {
-    n: "05",
-    title: "Scale",
-    body: "We optimise weekly and unlock new channels as data comes in.",
-  },
-];
+const STEP_COUNT = 5;
+const steps = Array.from({ length: STEP_COUNT }, (_, i) => ({
+  i,
+  n: String(i + 1).padStart(2, "0"),
+}));
 
 export default function AgentCanvas() {
   const media = useMediaResolver();
+  const c = useContentResolver();
   const [active, setActive] = useState(0);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -57,14 +37,12 @@ export default function AgentCanvas() {
     <section id="canvas" className="scroll-mt-24 bg-white py-24 md:py-32">
       <div className="container-canvas">
         <Reveal className="max-w-3xl">
-          <p className="eyebrow">The TAGVERSE System</p>
+          <p className="eyebrow">{c("canvas.eyebrow")}</p>
           <h2 className="mt-5 font-display text-section-h2 font-light leading-[1.18] tracking-display">
-            We don&apos;t just make content. We build marketing systems that
-            compound — every asset, every campaign, every automation works
-            together.
+            {c("canvas.heading")}
           </h2>
           <a href="#" className="btn-primary mt-8">
-            Explore our process
+            {c("canvas.cta")}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
           </a>
         </Reveal>
@@ -88,10 +66,10 @@ export default function AgentCanvas() {
                   </span>
                   <div>
                     <h3 className="font-brand text-2xl font-medium tracking-tight">
-                      {s.title}
+                      {c(`canvas.${i}.title`)}
                     </h3>
                     <p className="mt-3 max-w-md leading-7 text-muted-fg">
-                      {s.body}
+                      {c(`canvas.${i}.body`)}
                     </p>
                   </div>
                 </div>
@@ -108,7 +86,7 @@ export default function AgentCanvas() {
                   <img
                     key={s.n}
                     src={media(`agentcanvas.${i}`)}
-                    alt={s.title}
+                    alt={c(`canvas.${i}.title`)}
                     className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
                     style={{ opacity: active === i ? 1 : 0 }}
                   />

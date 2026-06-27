@@ -2,17 +2,19 @@
 
 import Reveal from "./Reveal";
 import { useMedia } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
 
 export default function Spotlight() {
   const bg = useMedia("spotlight.bg");
   const headshot = useMedia("spotlight.headshot");
+  const c = useContentResolver();
   return (
     <section id="customers" className="bg-white py-24 md:py-32">
       <div className="container-x">
         <Reveal className="max-w-3xl">
-          <p className="eyebrow">Results</p>
+          <p className="eyebrow">{c("spotlight.eyebrow")}</p>
           <h2 className="mt-5 font-display text-section-h2 font-light leading-[1.15] tracking-display">
-            See how brands scaled with TAGVERSE
+            {c("spotlight.heading")}
           </h2>
         </Reveal>
 
@@ -31,24 +33,24 @@ export default function Spotlight() {
           <div className="relative flex min-h-[560px] flex-col justify-between p-8 text-white md:p-12">
             <div className="flex items-start justify-between gap-6">
               <span className="rounded-full border border-white/25 px-4 py-1.5 font-mono-g text-[0.7rem] uppercase tracking-[0.16em] text-white/80">
-                Case study
+                {c("spotlight.badge")}
               </span>
               <div className="text-right">
                 <div className="font-display text-[clamp(2.5rem,5vw,4rem)] font-light leading-none tracking-display">
-                  (X)%
+                  {c("spotlight.statValue")}
                 </div>
                 <div className="mt-1 font-mono-g text-[0.7rem] uppercase tracking-[0.16em] text-white/60">
-                  Growth
+                  {c("spotlight.statLabel")}
                 </div>
               </div>
             </div>
 
             <div className="max-w-3xl">
               <h3 className="font-brand text-xl font-medium tracking-tight md:text-2xl">
-                How (Client Name) grew (X)% in (timeframe)
+                {c("spotlight.cardTitle")}
               </h3>
               <blockquote className="mt-6 font-display text-[clamp(1.25rem,2vw,1.6rem)] font-light leading-snug text-white/90">
-                &ldquo;(Placeholder for client testimonial)&rdquo;
+                &ldquo;{c("spotlight.quote")}&rdquo;
               </blockquote>
 
               <div className="mt-8 flex items-center justify-between gap-4">
@@ -60,15 +62,15 @@ export default function Spotlight() {
                     className="h-12 w-12 rounded-full object-cover"
                   />
                   <div>
-                    <div className="text-sm font-medium">(Client name)</div>
-                    <div className="text-sm text-white/60">(Role, brand)</div>
+                    <div className="text-sm font-medium">{c("spotlight.name")}</div>
+                    <div className="text-sm text-white/60">{c("spotlight.role")}</div>
                   </div>
                 </div>
                 <a
                   href="#"
                   className="inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition-opacity hover:opacity-90"
                 >
-                  View case study
+                  {c("spotlight.cta")}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                 </a>
               </div>

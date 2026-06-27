@@ -1,6 +1,7 @@
 "use client";
 
 import { useMedia } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
 
 function Arrow() {
   return (
@@ -12,6 +13,7 @@ function Arrow() {
 
 export default function Hero() {
   const video = useMedia("hero.video");
+  const c = useContentResolver();
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-white text-black">
       {/* ambient video backdrop */}
@@ -36,9 +38,9 @@ export default function Hero() {
           style={{ animationDelay: "60ms" }}
         >
           <span className="rounded-full bg-black px-2.5 py-0.5 text-[11px] font-semibold text-white">
-            New
+            {c("hero.badge")}
           </span>
-          TAGVERSE Studio Now Open in Chennai
+          {c("hero.badgeText")}
           <Arrow />
         </a>
 
@@ -46,17 +48,16 @@ export default function Hero() {
           className="animate-hero-rise mt-7 font-display text-hero font-light leading-[1.2] tracking-display min-[810px]:whitespace-nowrap"
           style={{ animationDelay: "120ms" }}
         >
-          Marketing that thinks.
+          {c("hero.title1")}
           <br />
-          <span className="italic text-black/40">Brands that move.</span>
+          <span className="italic text-black/40">{c("hero.title2")}</span>
         </h1>
 
         <p
           className="animate-hero-rise mx-auto mt-4 max-w-xl text-base leading-8 text-black/60"
           style={{ animationDelay: "200ms" }}
         >
-          AI-first creative studio for brands that want to grow faster, look
-          better, and convert harder.
+          {c("hero.subtitle")}
         </p>
 
         <div
@@ -67,7 +68,7 @@ export default function Hero() {
             href="#contact"
             className="inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-[1.02]"
           >
-            Book a call
+            {c("hero.cta")}
           </a>
         </div>
       </div>

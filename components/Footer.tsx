@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMedia } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
 
 const columns = [
   {
@@ -32,6 +33,7 @@ const columns = [
 
 export default function Footer() {
   const video = useMedia("footer.video");
+  const c = useContentResolver();
   return (
     <footer className="relative bg-black text-white">
       {/* ambient video backdrop */}
@@ -56,8 +58,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-6 text-white/55">
-              An AI-first creative studio for ambitious brands — strategy,
-              content, digital, and a live studio you can actually be part of.
+              {c("footer.tagline")}
             </p>
           </div>
 
@@ -80,7 +81,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-20 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-8 text-sm text-white/45 md:flex-row md:items-center">
-          <p>© 2026 Tagverse AI, Inc.</p>
+          <p>{c("footer.copyright")}</p>
           <div className="flex items-center gap-5">
             <a href="#" className="transition-colors hover:text-white">X</a>
             <a href="#" className="transition-colors hover:text-white">LinkedIn</a>

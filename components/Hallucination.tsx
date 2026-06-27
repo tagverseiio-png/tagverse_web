@@ -2,17 +2,19 @@
 
 import Reveal from "./Reveal";
 import { useMedia } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
 
 export default function Hallucination() {
   const video = useMedia("hallucination.video");
   const poster = useMedia("hallucination.poster");
+  const c = useContentResolver();
   return (
     <section id="hallucination" className="relative bg-black pb-24 pt-4 text-white">
       <div className="container-x">
         <Reveal className="mx-auto max-w-3xl text-center">
           <h2 className="font-display text-[clamp(2rem,4.3vw,2.75rem)] font-light leading-[1.25] tracking-display">
-            Great marketing shouldn&apos;t take 6 months.{" "}
-            <span className="italic text-white/60">Ours doesn&apos;t.</span>
+            {c("intro.title1")}{" "}
+            <span className="italic text-white/60">{c("intro.title2")}</span>
           </h2>
         </Reveal>
 
@@ -35,14 +37,13 @@ export default function Hallucination() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7z" />
             </svg>
-            Watch (1:30)
+            {c("intro.watch")}
           </button>
         </Reveal>
 
         <Reveal delay={200} className="mx-auto mt-12 max-w-2xl text-center">
           <p className="text-lg leading-8 text-white/70">
-            From strategy to execution — content, web, ads, and automation — live
-            in weeks, not quarters.
+            {c("intro.body")}
           </p>
         </Reveal>
       </div>

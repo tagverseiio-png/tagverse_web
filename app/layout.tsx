@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { MediaProvider } from "@/components/MediaProvider";
+import { ContentProvider } from "@/components/ContentProvider";
 
 const orbitron = Orbitron({ subsets: ["latin"], weight: ["600"], variable: "--font-orbitron" });
 
@@ -23,9 +24,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased ${orbitron.variable}`}>
         <MediaProvider>
-          <Header />
-          {children}
-          <Footer />
+          <ContentProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ContentProvider>
         </MediaProvider>
       </body>
     </html>

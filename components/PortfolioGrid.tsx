@@ -79,13 +79,21 @@ export default function PortfolioGrid() {
   // Loaded
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-      {projects.map((p, i) => (
+      {projects.map((p, i) => {
+        const href = p.url?.trim() || undefined;
+        const external = href ? /^https?:\/\//i.test(href) : false;
+        return (
         <Reveal
           key={p.id}
           delay={(i % 3) * 90}
           className={`group ${p.featured ? "lg:col-span-2" : ""}`}
         >
-          <a href="#" className="block">
+          <a
+            href={href}
+            target={external ? "_blank" : undefined}
+            rel={external ? "noopener noreferrer" : undefined}
+            className={`block ${href ? "" : "cursor-default"}`}
+          >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-muted">
               {p.img && (
                 /* eslint-disable-next-line @next/next/no-img-element */
@@ -108,7 +116,8 @@ export default function PortfolioGrid() {
             </div>
           </a>
         </Reveal>
-      ))}
+        );
+      })}
     </div>
   );
 }
