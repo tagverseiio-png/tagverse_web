@@ -29,6 +29,7 @@ type FormState = {
   category: string;
   year: string;
   url: string;
+  iframeUrl: string;
   featured: boolean;
   order: string;
   img: string;
@@ -39,6 +40,7 @@ const emptyForm: FormState = {
   category: "",
   year: "",
   url: "",
+  iframeUrl: "",
   featured: false,
   order: "",
   img: "",
@@ -224,6 +226,7 @@ function Dashboard() {
       category: p.category ?? "",
       year: p.year ?? "",
       url: p.url ?? "",
+      iframeUrl: p.iframeUrl ?? "",
       featured: !!p.featured,
       order: p.order != null ? String(p.order) : "",
       img: p.img ?? "",
@@ -264,6 +267,7 @@ function Dashboard() {
       category: form.category.trim(),
       year: form.year.trim(),
       url: form.url.trim(),
+      iframeUrl: form.iframeUrl.trim(),
       featured: form.featured,
     };
     if (form.order.trim() !== "") payload.order = Number(form.order);
@@ -385,6 +389,20 @@ function Dashboard() {
               </p>
             </div>
 
+            <div>
+              <label className={labelClass}>Live Preview (Iframe URL)</label>
+              <input
+                type="url"
+                className={`${inputClass} mt-1.5`}
+                value={form.iframeUrl}
+                onChange={(e) => setForm((f) => ({ ...f, iframeUrl: e.target.value }))}
+                placeholder="https://example.com"
+              />
+              <p className="mt-1 text-[0.7rem] text-muted-fg">
+                Render a live website inside the image container instead of uploading an image.
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Order</label>
@@ -492,11 +510,29 @@ function Dashboard() {
                     editingId === p.id ? "border-[var(--accent-purple)]" : "border-line"
                   }`}
                 >
-                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
-                    {p.img && (
+                  <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                    {p.iframeUrl ? (
+                      <div 
+                        className="absolute inset-0 overflow-hidden pointer-events-none"
+                        style={{ transform: "translateZ(0)", willChange: "transform" }}
+                      >
+                        <iframe
+                          src={p.iframeUrl}
+                          loading="lazy"
+                          style={{ 
+                            width: "400%", 
+                            height: "400%", 
+                            transform: "scale(0.25) translateZ(0)", 
+                            transformOrigin: "0 0",
+                            willChange: "transform"
+                          }}
+                          className="absolute top-0 left-0 border-0"
+                        />
+                      </div>
+                    ) : p.img ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={p.img} alt="" className="h-full w-full object-cover" />
-                    )}
+                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

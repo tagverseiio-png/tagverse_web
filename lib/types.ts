@@ -16,6 +16,7 @@ export type Project = {
   year: string;
   img?: string;
   url?: string;
+  iframeUrl?: string;
   featured?: boolean;
   order?: number;
 };

@@ -95,14 +95,32 @@ export default function PortfolioGrid() {
             className={`block ${href ? "" : "cursor-default"}`}
           >
             <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-muted">
-              {p.img && (
+              {p.iframeUrl ? (
+                <div 
+                  className="absolute inset-0 overflow-hidden pointer-events-none transition-transform duration-700 group-hover:scale-[1.04]"
+                  style={{ transform: "translateZ(0)", willChange: "transform" }}
+                >
+                  <iframe
+                    src={p.iframeUrl}
+                    loading="lazy"
+                    style={{ 
+                      width: "400%", 
+                      height: "400%", 
+                      transform: "scale(0.25) translateZ(0)", 
+                      transformOrigin: "0 0",
+                      willChange: "transform"
+                    }}
+                    className="absolute top-0 left-0 border-0"
+                  />
+                </div>
+              ) : p.img ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={p.img}
                   alt={p.title}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 />
-              )}
+              ) : null}
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </div>
             <div className="mt-4 flex items-baseline justify-between">
