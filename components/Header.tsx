@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useContactModal } from "./ContactModal";
 
 const nav = [
   { label: "Portfolio", href: "/portfolio" },
@@ -16,6 +17,7 @@ const darkHeroRoutes = ["/portfolio", "/services", "/studio"];
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { open } = useContactModal();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -64,8 +66,8 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="#contact"
+            <button
+              onClick={open}
               className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all ${
                 lightText
                   ? "border border-white/30 text-white hover:bg-white/10"
@@ -73,7 +75,7 @@ export default function Header() {
               }`}
             >
               Book a call
-            </Link>
+            </button>
           </div>
         </div>
       </div>

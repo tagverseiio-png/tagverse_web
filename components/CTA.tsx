@@ -3,10 +3,12 @@
 import Reveal from "./Reveal";
 import { useMedia } from "./MediaProvider";
 import { useContentResolver } from "./ContentProvider";
+import { useContactModal } from "./ContactModal";
 
 export default function CTA() {
   const bg = useMedia("cta.bg");
   const c = useContentResolver();
+  const { open } = useContactModal();
   return (
     <section id="contact" className="scroll-mt-24 bg-white pb-8 pt-4">
       <div className="container-x">
@@ -28,12 +30,12 @@ export default function CTA() {
             <p className="mx-auto mt-6 max-w-xl leading-7 text-white/65">
               {c("cta.body")}
             </p>
-            <a
-              href="#"
+            <button
+              onClick={open}
               className="mt-9 inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition-transform hover:scale-[1.02]"
             >
               {c("cta.button")}
-            </a>
+            </button>
           </div>
         </Reveal>
       </div>

@@ -2,6 +2,7 @@
 
 import { useMedia } from "./MediaProvider";
 import { useContentResolver } from "./ContentProvider";
+import { useContactModal } from "./ContactModal";
 
 function Arrow() {
   return (
@@ -14,6 +15,7 @@ function Arrow() {
 export default function Hero() {
   const video = useMedia("hero.video");
   const c = useContentResolver();
+  const { open } = useContactModal();
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-white text-black">
       {/* ambient video backdrop */}
@@ -64,12 +66,12 @@ export default function Hero() {
           className="animate-hero-rise mt-7"
           style={{ animationDelay: "280ms" }}
         >
-          <a
-            href="#contact"
+          <button
+            onClick={open}
             className="inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-[1.02]"
           >
             {c("hero.cta")}
-          </a>
+          </button>
         </div>
       </div>
     </section>
