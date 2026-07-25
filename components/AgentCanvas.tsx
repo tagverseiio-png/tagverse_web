@@ -79,7 +79,7 @@ export default function AgentCanvas() {
 
           {/* sticky media */}
           <div className="order-1 lg:order-2">
-            <div className="lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-1/2 lg:-translate-y-1/2">
               <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-surface">
                 {steps.map((s, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
