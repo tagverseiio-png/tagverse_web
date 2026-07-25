@@ -15,8 +15,12 @@ export default function AgentCanvas() {
   const media = useMediaResolver();
   const c = useContentResolver();
   const [active, setActive] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
   const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const imgWrapRef = useRef<HTMLDivElement | null>(null);
 
+  // Track active step via IntersectionObserver
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
@@ -33,8 +37,37 @@ export default function AgentCanvas() {
     return () => io.disconnect();
   }, []);
 
+  // Parallax scroll effect on the image
+  useEffect(() => {
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Calculate parallax offset based on section position
+  const section = sectionRef.current;
+  const imgWrap = imgWrapRef.current;
+  let parallaxOffset = 0;
+  if (section && imgWrap) {
+    const rect = section.getBoundingClientRect();
+    const sectionTop = rect.top + window.scrollY;
+    const sectionHeight = rect.height;
+    const progress = (scrollY - sectionTop + window.innerHeight * 0.5) / sectionHeight;
+    const clamped = Math.max(0, Math.min(1, progress));
+    parallaxOffset = (clamped - 0.5) * 60; // -30px to +30px range
+  }
+
   return (
-    <section id="canvas" className="scroll-mt-24 bg-white py-24 md:py-32">
+    <section id="canvas" ref={sectionRef} className="scroll-mt-24 bg-white py-24 md:py-32">
       <div className="container-canvas">
         <Reveal className="max-w-3xl">
           <p className="eyebrow">{c("canvas.eyebrow")}</p>
@@ -77,18 +110,25 @@ export default function AgentCanvas() {
             ))}
           </div>
 
-          {/* sticky media */}
+          {/* sticky media with parallax */}
           <div className="order-1 lg:order-2">
             <div className="lg:sticky lg:top-1/2 lg:-translate-y-1/2">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-surface">
+              <div
+                ref={imgWrapRef}
+                className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-surface transition-transform duration-150 ease-out"
+                style={{ transform: `translateY(${parallaxOffset}px)` }}
+              >
                 {steps.map((s, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={s.n}
                     src={media(`agentcanvas.${i}`)}
                     alt={c(`canvas.${i}.title`)}
-                    className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
-                    style={{ opacity: active === i ? 1 : 0 }}
+                    className="absolute inset-0 h-full w-full object-cover transition-all duration-700"
+                    style={{
+                      opacity: active === i ? 1 : 0,
+                      transform: active === i ? "scale(1)" : "scale(1.08)",
+                    }}
                   />
                 ))}
               </div>
