@@ -35,3 +35,20 @@ export type Logo = {
   url?: string;
   order?: number;
 };
+
+/**
+ * Firestore `enquiries` collection — contact form submissions.
+ *   name      (string)
+ *   email     (string)
+ *   phone     (string)
+ *   message   (string)
+ *   createdAt (string) ISO date string
+ */
+export type Enquiry = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  createdAt: string;
+};

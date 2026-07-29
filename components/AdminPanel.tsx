@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Project } from "@/lib/types";
+import type { Project, Enquiry } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
 import MediaManager from "./MediaManager";
 import ContentManager from "./ContentManager";
@@ -109,7 +109,7 @@ export default function AdminPanel() {
 }
 
 function AdminShell() {
-  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media">(
+  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media" | "enquiries">(
     "projects",
   );
 
@@ -128,6 +128,9 @@ function AdminShell() {
           </TabButton>
           <TabButton active={tab === "media"} onClick={() => setTab("media")}>
             Home media
+          </TabButton>
+          <TabButton active={tab === "enquiries"} onClick={() => setTab("enquiries")}>
+            Enquiries
           </TabButton>
         </div>
       </div>
@@ -160,6 +163,16 @@ function AdminShell() {
             </h1>
             <div className="mt-6">
               <MediaManager />
+            </div>
+          </div>
+        )}
+        {tab === "enquiries" && (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Enquiries
+            </h1>
+            <div className="mt-6">
+              <EnquiriesManager />
             </div>
           </div>
         )}
@@ -584,3 +597,72 @@ function Dashboard() {
     </div>
   );
 }
+
+function EnquiriesManager() {
+  const [enquiries, setEnquiries] = useState<any[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const snap = await getDocs(collection(db, "enquiries"));
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Enquiry);
+      docs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setEnquiries(docs);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load enquiries.");
+      setEnquiries([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function onDelete(id: string) {
+    if (!window.confirm("Delete this enquiry?")) return;
+    setBusyId(id);
+    try {
+      await deleteDoc(doc(db, "enquiries", id));
+      await load();
+    } catch (e) {
+      alert("Failed to delete");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!enquiries) return <div className="text-muted-fg">Loading enquiries...</div>;
+  if (enquiries.length === 0) return <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">No enquiries yet.</div>;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {enquiries.map((e) => (
+        <div key={e.id} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-brand text-lg font-medium">{e.name}</h3>
+              <p className="text-sm text-muted-fg">{e.email}</p>
+              {e.phone && <p className="text-sm text-muted-fg">{e.phone}</p>}
+            </div>
+            <button
+              onClick={() => onDelete(e.id)}
+              disabled={busyId === e.id}
+              className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
+          <div className="mt-4 rounded-lg bg-muted p-4 text-sm text-fg">
+            <p className="whitespace-pre-wrap">{e.message}</p>
+          </div>
+          <div className="mt-4 text-[0.65rem] text-muted-fg uppercase tracking-wider">
+            {new Date(e.createdAt).toLocaleString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+

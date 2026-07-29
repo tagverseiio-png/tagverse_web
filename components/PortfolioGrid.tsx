@@ -39,10 +39,10 @@ export default function PortfolioGrid() {
   // Loading — skeleton grid
   if (projects === null) {
     return (
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 grid-flow-row-dense">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className={i % 4 === 0 ? "lg:col-span-2" : ""}>
-            <div className="aspect-[4/3] animate-pulse rounded-[20px] bg-muted" />
+          <div key={i} className={i % 4 === 0 ? "lg:col-span-2 lg:row-span-2 flex flex-col" : "flex flex-col"}>
+            <div className={`relative overflow-hidden rounded-[20px] bg-muted ${i % 4 === 0 ? "flex-1" : "aspect-[4/3]"}`} />
             <div className="mt-4 h-4 w-1/2 animate-pulse rounded bg-muted" />
             <div className="mt-2 h-3 w-1/3 animate-pulse rounded bg-muted" />
           </div>
@@ -78,7 +78,7 @@ export default function PortfolioGrid() {
 
   // Loaded
   return (
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 grid-flow-row-dense">
       {projects.map((p, i) => {
         const href = p.url?.trim() || undefined;
         const external = href ? /^https?:\/\//i.test(href) : false;
@@ -86,15 +86,15 @@ export default function PortfolioGrid() {
         <Reveal
           key={p.id}
           delay={(i % 3) * 90}
-          className={`group ${p.featured ? "lg:col-span-2" : ""}`}
+          className={`group flex flex-col ${p.featured ? "lg:col-span-2 lg:row-span-2" : ""}`}
         >
           <a
             href={href}
             target={external ? "_blank" : undefined}
             rel={external ? "noopener noreferrer" : undefined}
-            className={`block ${href ? "" : "cursor-default"}`}
+            className={`block flex-1 flex flex-col ${href ? "" : "cursor-default"}`}
           >
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[20px] border border-line bg-muted">
+            <div className={`relative overflow-hidden rounded-[20px] border border-line bg-muted ${p.featured ? "flex-1" : "aspect-[4/3]"}`}>
               {p.iframeUrl ? (
                 <div 
                   className="absolute inset-0 overflow-hidden pointer-events-none transition-transform duration-700 group-hover:scale-[1.04]"

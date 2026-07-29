@@ -1,56 +1,76 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
+import CTA from "@/components/CTA";
 
 export const metadata: Metadata = {
-  title: "Studio — Coming soon · Tagverse",
+  title: "Studio — Tagverse",
   description:
-    "The Tagverse podcast studio is coming soon. Live recordings and ticketed seats — stay tuned.",
+    "Our state-of-the-art content studio in Chennai for podcasts, shoots, and live sessions.",
 };
+
+const studioFeatures = [
+  {
+    title: "Podcast Production",
+    body: "Professional multi-cam setups and broadcast-quality audio for your next chart-topping podcast. We handle recording, mixing, and distribution.",
+    points: ["Multi-cam recording", "Broadcast audio", "Live mixing", "Post-production"],
+  },
+  {
+    title: "Commercial Shoots",
+    body: "Versatile setups with premium lighting and backdrops. Perfect for product shoots, interviews, and brand films.",
+    points: ["Lighting grid", "Multiple backdrops", "Green screen", "Pro gear"],
+  },
+  {
+    title: "Live Sessions",
+    body: "Host webinars, live streams, and interactive sessions with high-speed internet and real-time vision mixing.",
+    points: ["Vision mixing", "Low latency", "Teleprompter", "Audience seating"],
+  },
+  {
+    title: "Post-Production",
+    body: "Edit your content right after you shoot. Our suites are equipped with the latest hardware for editing, color grading, and VFX.",
+    points: ["Color grading", "Sound design", "VFX & Motion", "Fast turnaround"],
+  },
+];
 
 export default function StudioPage() {
   return (
-    <main className="relative flex min-h-[100svh] items-center justify-center overflow-hidden bg-black text-white">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/hero-home.webp"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover opacity-30"
+    <main className="overflow-x-hidden">
+      <PageHero
+        eyebrow="Studio"
+        title="Create. Record. Scale."
+        subtitle="Our state-of-the-art content studio in Chennai — built for creators, brands, and live sessions."
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
 
-      <div className="container-x relative text-center">
-        <Reveal>
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-[13px] font-medium backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent-violet)]" />
-            Tagverse Studio
-          </span>
-
-          <h1 className="mt-7 font-display text-[clamp(3rem,9vw,7rem)] font-light leading-[0.95] tracking-display">
-            Coming soon.
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-md text-lg leading-8 text-white/65">
-            Our content studio — shoots, podcasts, and live sessions — is opening
-            soon in Chennai. Be the first to book a seat.
-          </p>
-
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/"
-              className="inline-flex items-center justify-center rounded-full bg-white px-7 py-3 text-sm font-medium text-black transition-transform hover:scale-[1.02]"
-            >
-              Back to home
-            </Link>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center rounded-full border border-white/20 px-7 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
-            >
-              Notify me
-            </a>
+      <section className="bg-white py-20 md:py-28">
+        <div className="container-x">
+          <div className="grid gap-5 md:grid-cols-2">
+            {studioFeatures.map((f, i) => (
+              <Reveal
+                key={f.title}
+                delay={(i % 2) * 90}
+                className="flex flex-col rounded-[20px] border border-line bg-surface p-8 transition-shadow hover:shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)]"
+              >
+                <h3 className="font-brand text-2xl font-medium tracking-tight">
+                  {f.title}
+                </h3>
+                <p className="mt-3 leading-7 text-muted-fg">{f.body}</p>
+                <ul className="mt-6 flex flex-wrap gap-2">
+                  {f.points.map((p) => (
+                    <li
+                      key={p}
+                      className="rounded-full border border-line bg-white px-3 py-1 text-sm"
+                    >
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            ))}
           </div>
-        </Reveal>
-      </div>
+        </div>
+      </section>
+
+      <CTA />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import PortfolioGrid from "@/components/PortfolioGrid";
+import CTA from "@/components/CTA";
 
 export const metadata: Metadata = {
   title: "Portfolio — Tagverse",
@@ -21,6 +22,7 @@ export default function PortfolioPage() {
           <PortfolioGrid />
         </div>
       </section>
+      <CTA />
     </main>
   );
 }
