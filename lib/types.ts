@@ -66,3 +66,19 @@ export type StudioBooking = {
   qty: number;
   createdAt: string;
 };
+
+/**
+ * Firestore `studioShows` collection — dynamic studio live recordings.
+ */
+export type StudioShow = {
+  id: string;
+  title: string;
+  guest: string;
+  date: string;
+  day: string;
+  time: string;
+  venue: string;
+  seatsLeft: number;
+  tag: string;
+  createdAt: string;
+};

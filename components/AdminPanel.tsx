@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Project, Enquiry, StudioBooking } from "@/lib/types";
+import type { Project, Enquiry, StudioBooking, StudioShow } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
 import MediaManager from "./MediaManager";
 import ContentManager from "./ContentManager";
@@ -109,7 +109,7 @@ export default function AdminPanel() {
 }
 
 function AdminShell() {
-  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media" | "enquiries" | "studioBookings">(
+  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media" | "enquiries" | "studioBookings" | "studioShows">(
     "projects",
   );
 
@@ -134,6 +134,9 @@ function AdminShell() {
           </TabButton>
           <TabButton active={tab === "studioBookings"} onClick={() => setTab("studioBookings")}>
             Studio Bookings
+          </TabButton>
+          <TabButton active={tab === "studioShows"} onClick={() => setTab("studioShows")}>
+            Manage Shows
           </TabButton>
         </div>
       </div>
@@ -186,6 +189,16 @@ function AdminShell() {
             </h1>
             <div className="mt-6">
               <StudioBookingsManager />
+            </div>
+          </div>
+        )}
+        {tab === "studioShows" && (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Manage Shows
+            </h1>
+            <div className="mt-6">
+              <StudioShowsManager />
             </div>
           </div>
         )}
@@ -748,3 +761,157 @@ function StudioBookingsManager() {
   );
 }
 
+function StudioShowsManager() {
+  const [shows, setShows] = useState<StudioShow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      const snap = await getDocs(collection(db, "studioShows"));
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as StudioShow);
+      docs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setShows(docs);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load shows.");
+      setShows([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function onDelete(id: string) {
+    if (!window.confirm("Delete this show?")) return;
+    setBusyId(id);
+    try {
+      await deleteDoc(doc(db, "studioShows", id));
+      await load();
+    } catch (e) {
+      alert("Failed to delete");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusyId("add");
+    try {
+      const fd = new FormData(e.currentTarget);
+      const newShow = {
+        title: fd.get("title") as string,
+        guest: fd.get("guest") as string,
+        date: fd.get("date") as string,
+        day: fd.get("day") as string,
+        time: fd.get("time") as string,
+        venue: fd.get("venue") as string,
+        seatsLeft: parseInt(fd.get("seatsLeft") as string, 10),
+        tag: fd.get("tag") as string,
+        createdAt: new Date().toISOString(),
+      };
+      await addDoc(collection(db, "studioShows"), newShow);
+      setAdding(false);
+      await load();
+    } catch (err) {
+      alert("Failed to add show");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!shows) return <div className="text-muted-fg">Loading shows...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-end">
+        <button
+          onClick={() => setAdding(!adding)}
+          className="rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
+        >
+          {adding ? "Cancel" : "Add new show"}
+        </button>
+      </div>
+
+      {adding && (
+        <form onSubmit={handleAdd} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
+          <h3 className="mb-4 font-brand text-lg font-medium">Add New Show</h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Title (e.g. Building in Public)</label>
+              <input name="title" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Guest (e.g. with Aarav Mehta)</label>
+              <input name="guest" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Date (e.g. Jul 12)</label>
+              <input name="date" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Day (e.g. Fri)</label>
+              <input name="day" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Time (e.g. 7:00 PM)</label>
+              <input name="time" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Venue (e.g. Tagverse Studio)</label>
+              <input name="venue" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Seats Left (e.g. 21)</label>
+              <input name="seatsLeft" type="number" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Tag (e.g. Live recording)</label>
+              <input name="tag" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+            </div>
+          </div>
+          <button disabled={busyId === "add"} className="mt-4 rounded-full bg-fg px-6 py-2 text-sm font-medium text-bg disabled:opacity-50">
+            {busyId === "add" ? "Saving..." : "Save Show"}
+          </button>
+        </form>
+      )}
+
+      {shows.length === 0 && !adding && (
+        <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">
+          No shows scheduled yet.
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {shows.map((s) => (
+          <div key={s.id} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="mb-2 inline-block rounded-full bg-line px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider text-muted-fg">
+                  {s.tag}
+                </span>
+                <h3 className="font-brand text-lg font-medium">{s.title}</h3>
+                <p className="text-sm text-muted-fg">{s.guest}</p>
+                <p className="mt-2 text-sm text-muted-fg">
+                  {s.date} ({s.day}) · {s.time}
+                </p>
+                <p className="text-sm text-muted-fg">{s.venue}</p>
+                <p className="mt-1 text-xs font-medium text-[var(--accent-orange)]">{s.seatsLeft} seats left</p>
+              </div>
+              <button
+                onClick={() => onDelete(s.id)}
+                disabled={busyId === s.id}
+                className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
