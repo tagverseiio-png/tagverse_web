@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
 import CTA from "@/components/CTA";
+import Studio from "@/components/Studio";
 
 export const metadata: Metadata = {
   title: "Studio — Tagverse",
@@ -69,6 +70,8 @@ export default function StudioPage() {
           </div>
         </div>
       </section>
+
+      <Studio />
 
       <CTA />
     </main>

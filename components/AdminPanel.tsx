@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import type { Project, Enquiry } from "@/lib/types";
+import type { Project, Enquiry, StudioBooking } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
 import MediaManager from "./MediaManager";
 import ContentManager from "./ContentManager";
@@ -109,7 +109,7 @@ export default function AdminPanel() {
 }
 
 function AdminShell() {
-  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media" | "enquiries">(
+  const [tab, setTab] = useState<"projects" | "logos" | "content" | "media" | "enquiries" | "studioBookings">(
     "projects",
   );
 
@@ -131,6 +131,9 @@ function AdminShell() {
           </TabButton>
           <TabButton active={tab === "enquiries"} onClick={() => setTab("enquiries")}>
             Enquiries
+          </TabButton>
+          <TabButton active={tab === "studioBookings"} onClick={() => setTab("studioBookings")}>
+            Studio Bookings
           </TabButton>
         </div>
       </div>
@@ -173,6 +176,16 @@ function AdminShell() {
             </h1>
             <div className="mt-6">
               <EnquiriesManager />
+            </div>
+          </div>
+        )}
+        {tab === "studioBookings" && (
+          <div className="container-x">
+            <h1 className="font-brand text-2xl font-medium tracking-tight">
+              Studio Bookings
+            </h1>
+            <div className="mt-6">
+              <StudioBookingsManager />
             </div>
           </div>
         )}
@@ -659,6 +672,75 @@ function EnquiriesManager() {
           </div>
           <div className="mt-4 text-[0.65rem] text-muted-fg uppercase tracking-wider">
             {new Date(e.createdAt).toLocaleString()}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StudioBookingsManager() {
+  const [bookings, setBookings] = useState<any[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const snap = await getDocs(collection(db, "studioBookings"));
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as StudioBooking);
+      docs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setBookings(docs);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load bookings.");
+      setBookings([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function onDelete(id: string) {
+    if (!window.confirm("Delete this booking?")) return;
+    setBusyId(id);
+    try {
+      await deleteDoc(doc(db, "studioBookings", id));
+      await load();
+    } catch (e) {
+      alert("Failed to delete");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (error) return <div className="text-red-500">{error}</div>;
+  if (!bookings) return <div className="text-muted-fg">Loading bookings...</div>;
+  if (bookings.length === 0) return <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">No studio bookings yet.</div>;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {bookings.map((b) => (
+        <div key={b.id} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-brand text-lg font-medium">{b.name}</h3>
+              <p className="text-sm text-muted-fg">{b.email}</p>
+              {b.phone && <p className="text-sm text-muted-fg">{b.phone}</p>}
+            </div>
+            <button
+              onClick={() => onDelete(b.id)}
+              disabled={busyId === b.id}
+              className="rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+            >
+              Delete
+            </button>
+          </div>
+          <div className="mt-4 rounded-lg bg-[var(--accent-purple-muted)] p-4 text-sm text-[var(--accent-purple)]">
+            <p className="font-medium">{b.showTitle}</p>
+            <p className="mt-1 opacity-80">{b.qty} ticket{b.qty > 1 ? "s" : ""} requested</p>
+          </div>
+          <div className="mt-4 text-[0.65rem] text-muted-fg uppercase tracking-wider">
+            {new Date(b.createdAt).toLocaleString()}
           </div>
         </div>
       ))}

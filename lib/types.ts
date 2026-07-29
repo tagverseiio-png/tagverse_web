@@ -52,3 +52,17 @@ export type Enquiry = {
   message: string;
   createdAt: string;
 };
+
+/**
+ * Firestore `studioBookings` collection — studio live session bookings.
+ */
+export type StudioBooking = {
+  id: string;
+  showId: string;
+  showTitle: string;
+  name: string;
+  email: string;
+  phone: string;
+  qty: number;
+  createdAt: string;
+};
