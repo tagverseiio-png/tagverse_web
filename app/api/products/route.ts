@@ -27,13 +27,13 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, category, tagline, description, features, status, demoUrl, repoUrl, img, order } = body;
+    const { id, name, category, tagline, description, features, status, demoUrl, repoUrl, img, order } = body;
 
     if (!name || !category) {
       return NextResponse.json({ error: "Name and category are required" }, { status: 400 });
     }
 
-    const newProduct: Omit<Product, "id"> = {
+    const productData: Omit<Product, "id"> = {
       name,
       category,
       tagline: tagline || "",
@@ -43,19 +43,49 @@ export async function POST(req: NextRequest) {
       demoUrl: demoUrl || "",
       repoUrl: repoUrl || "",
       img: img || "",
-      order: typeof order === "number" ? order : inMemoryProducts.length + 1,
+      order: typeof order === "number" ? order : 1,
     };
 
-    let docId = `prod_${Date.now()}`;
-    try {
-      const docRef = await addDoc(collection(db, "products"), newProduct);
-      docId = docRef.id;
-    } catch {
-      inMemoryProducts.push({ id: docId, ...newProduct });
+    if (id) {
+      // Update existing
+      try {
+        await updateDoc(doc(db, "products", id), productData);
+      } catch {
+        inMemoryProducts = inMemoryProducts.map((p) => (p.id === id ? { id, ...productData } : p));
+      }
+      return NextResponse.json({ success: true, id });
+    } else {
+      // Create new
+      let docId = `prod_${Date.now()}`;
+      try {
+        const docRef = await addDoc(collection(db, "products"), productData);
+        docId = docRef.id;
+      } catch {
+        inMemoryProducts.push({ id: docId, ...productData });
+      }
+      return NextResponse.json({ success: true, id: docId });
+    }
+  } catch (err) {
+    return NextResponse.json({ error: "Failed to save product" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "Product id is required" }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, id: docId });
+    try {
+      await deleteDoc(doc(db, "products", id));
+    } catch {
+      inMemoryProducts = inMemoryProducts.filter((p) => p.id !== id);
+    }
+
+    return NextResponse.json({ success: true, id });
   } catch (err) {
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
   }
 }

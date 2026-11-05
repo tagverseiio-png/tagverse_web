@@ -179,22 +179,6 @@ export default function Studio() {
         setCalendarLink(data.googleCalendarUrl);
       }
 
-      // Also persist to client Firestore if available
-      try {
-        await addDoc(collection(db, "studioBookings"), {
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          date,
-          time,
-          services: selectedServices,
-          notes: form.notes.trim(),
-          status: "pending",
-          createdAt: new Date().toISOString(),
-        });
-      } catch (clientDbErr) {
-        console.warn("Client Firestore booking sync note:", clientDbErr);
-      }
 
       // Construct and trigger direct WhatsApp confirmation message
       const timeSlot = TIME_SLOTS.find((t) => t.label === time);

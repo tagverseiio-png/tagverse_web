@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { MEDIA_SLOTS, type MediaSlot } from "@/lib/mediaSlots";
-import { approxKB, compressImage } from "@/lib/compressImage";
+import { approxKB, compressImage, fileToBase64 } from "@/lib/compressImage";
 
 export default function MediaManager() {
   const [overrides, setOverrides] = useState<Record<string, string> | null>(null);
@@ -203,12 +203,45 @@ function MediaRow({
             )}
           </div>
         ) : (
-          <input
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            placeholder="https://…/video.mp4 (or Storage URL)"
-            className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-1.5 text-xs outline-none focus:border-[var(--accent-purple)]"
-          />
+          <div className="mt-2 space-y-2">
+            <input
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              placeholder="https://…/video.mp4"
+              className="w-full rounded-lg border border-line bg-white px-3 py-1.5 text-xs outline-none focus:border-[var(--accent-purple)]"
+            />
+            <div className="flex items-center gap-2">
+              <label className="inline-flex cursor-pointer items-center rounded-full border border-line px-3 py-1 text-[11px] transition-colors hover:bg-muted">
+                {compressing ? "Converting..." : "Upload Video (Base64)"}
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    setCompressing(true);
+                    setErr(null);
+                    try {
+                      const b64 = await fileToBase64(f);
+                      setVideoUrl(b64);
+                    } catch (err: unknown) {
+                      setErr(err instanceof Error ? err.message : "Failed to convert video");
+                    } finally {
+                      setCompressing(false);
+                      e.target.value = "";
+                    }
+                  }}
+                  disabled={compressing}
+                />
+              </label>
+              {videoUrl.startsWith("data:") && (
+                <span className="text-[10px] text-muted-fg font-mono-g">
+                  ~{approxKB(videoUrl)} KB Base64 ready
+                </span>
+              )}
+            </div>
+          </div>
         )}
 
         {err && <p className="mt-1.5 text-xs text-red-600">{err}</p>}

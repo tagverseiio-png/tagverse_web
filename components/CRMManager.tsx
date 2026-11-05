@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { Enquiry, CRMNote } from "@/lib/types";
 
@@ -24,6 +24,17 @@ export default function CRMManager() {
   const [activeLead, setActiveLead] = useState<Enquiry | null>(null);
   const [newNote, setNewNote] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    service: "AI Agents & LLM Integration Services",
+    budget: "₹50k – ₹2L",
+    message: "",
+    stage: "new" as Enquiry["stage"],
+  });
+  const [creatingLead, setCreatingLead] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -153,6 +164,40 @@ export default function CRMManager() {
     link.click();
     document.body.removeChild(link);
   }
+  async function handleCreateLead(e: React.FormEvent) {
+    e.preventDefault();
+    if (!addForm.name.trim() || !addForm.email.trim()) return;
+    setCreatingLead(true);
+    try {
+      await addDoc(collection(db, "enquiries"), {
+        name: addForm.name.trim(),
+        email: addForm.email.trim().toLowerCase(),
+        phone: addForm.phone.trim(),
+        service: addForm.service,
+        budget: addForm.budget,
+        message: addForm.message.trim(),
+        stage: addForm.stage || "new",
+        source: "admin_manual_entry",
+        createdAt: new Date().toISOString(),
+      });
+      setShowAddModal(false);
+      setAddForm({
+        name: "",
+        email: "",
+        phone: "",
+        service: "AI Agents & LLM Integration Services",
+        budget: "₹50k – ₹2L",
+        message: "",
+        stage: "new",
+      });
+      await load();
+    } catch {
+      alert("Failed to create lead in Firestore.");
+    } finally {
+      setCreatingLead(false);
+    }
+  }
+
 
   if (!enquiries) {
     return <div className="text-sm text-muted-fg">Loading CRM Pipeline...</div>;
@@ -197,6 +242,13 @@ export default function CRMManager() {
             onChange={(e) => setSearch(e.target.value)}
             className="rounded-full border border-line bg-white px-3.5 py-1.5 text-xs outline-none focus:border-[var(--accent-purple)]"
           />
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-black px-3.5 py-1.5 text-xs font-medium text-white hover:opacity-90"
+          >
+            + New Lead
+          </button>
           <button
             onClick={exportCSV}
             className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-black hover:bg-black/5"
@@ -381,6 +433,111 @@ export default function CRMManager() {
           )}
         </div>
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form
+            onSubmit={handleCreateLead}
+            className="w-full max-w-md rounded-[20px] border border-line bg-white p-6 shadow-xl space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="font-brand text-lg font-medium">Add New Lead</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="text-muted-fg hover:text-black"
+              >
+                &times;
+              </button>
+            </div>
+            <div>
+              <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Contact Name *</label>
+              <input
+                required
+                type="text"
+                value={addForm.name}
+                onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                placeholder="e.g. Rahul Sharma"
+                className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Email *</label>
+                <input
+                  required
+                  type="email"
+                  value={addForm.email}
+                  onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                  placeholder="name@company.com"
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Phone</label>
+                <input
+                  type="tel"
+                  value={addForm.phone}
+                  onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })}
+                  placeholder="+91..."
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Service</label>
+                <input
+                  type="text"
+                  value={addForm.service}
+                  onChange={(e) => setAddForm({ ...addForm, service: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Stage</label>
+                <select
+                  value={addForm.stage}
+                  onChange={(e) => setAddForm({ ...addForm, stage: e.target.value as Enquiry["stage"] })}
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                >
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="qualified">Qualified</option>
+                  <option value="proposal">Proposal</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Message / Requirement</label>
+              <textarea
+                rows={3}
+                value={addForm.message}
+                onChange={(e) => setAddForm({ ...addForm, message: e.target.value })}
+                placeholder="Project overview, requirements, notes..."
+                className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-line">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-muted-fg hover:text-black"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creatingLead}
+                className="rounded-full bg-black px-5 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {creatingLead ? "Saving..." : "Create Lead"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import type { Logo } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
-
+import { DEFAULT_LOGOS } from "@/lib/logos";
 const inputClass =
   "w-full rounded-lg border border-line bg-white px-3 py-2 text-sm outline-none transition-colors focus:border-[var(--accent-purple)]";
 const labelClass =
@@ -135,6 +135,25 @@ export default function LogosManager() {
       setBusy(false);
     }
   }
+  async function seedDefaultLogos() {
+    setBusy(true);
+    setError(null);
+    try {
+      for (let i = 0; i < DEFAULT_LOGOS.length; i++) {
+        await addDoc(collection(db, "logos"), {
+          text: DEFAULT_LOGOS[i],
+          order: i + 1,
+        });
+      }
+      await load();
+      setMsg("Default logos seeded into Firestore.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to seed logos.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   return (
     <div>
@@ -260,9 +279,15 @@ export default function LogosManager() {
           {logos === null ? (
             <p className="text-sm text-muted-fg">Loading…</p>
           ) : logos.length === 0 ? (
-            <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">
-              No logos yet — the default names are showing on the site. Add your
-              first one on the left.
+            <div className="rounded-[20px] border border-dashed border-line p-8 text-center text-sm text-muted-fg space-y-3">
+              <p>No custom logos in Firestore yet — default logos are showing on site.</p>
+              <button
+                onClick={seedDefaultLogos}
+                disabled={busy}
+                className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                Seed Default Logos
+              </button>
             </div>
           ) : (
             <ul className="space-y-3">

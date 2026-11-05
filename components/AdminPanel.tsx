@@ -12,7 +12,7 @@ import {
 import { db } from "@/lib/firebase";
 import type { Project, Enquiry, StudioBooking, StudioShow, PortfolioCategory } from "@/lib/types";
 import { approxKB, compressImage } from "@/lib/compressImage";
-import { PORTFOLIO_CATEGORIES } from "@/lib/defaultData";
+import { DEFAULT_PROJECTS, PORTFOLIO_CATEGORIES } from "@/lib/defaultData";
 import MediaManager from "./MediaManager";
 
 const TIME_SLOTS = [
@@ -81,8 +81,10 @@ const emptyForm: FormState = {
 
 export default function AdminPanel() {
   const [unlocked, setUnlocked] = useState(false);
+  const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [passError, setPassError] = useState(false);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
   useEffect(() => {
     if (sessionStorage.getItem(SESSION_KEY) === "1") setUnlocked(true);
@@ -90,17 +92,27 @@ export default function AdminPanel() {
 
   async function tryUnlock(e: React.FormEvent) {
     e.preventDefault();
+    setErrorDetail(null);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ passcode: pass }),
+        body: JSON.stringify({ passcode: pass, email: email.trim() || undefined }),
       });
       if (res.ok) {
+        const data = (await res.json()) as { user?: { name: string; role: string; email: string } };
         sessionStorage.setItem(SESSION_KEY, "1");
+        if (data.user) {
+          sessionStorage.setItem("tv_admin_name", data.user.name);
+          sessionStorage.setItem("tv_admin_role", data.user.role);
+          sessionStorage.setItem("tv_admin_email", data.user.email);
+        }
         setUnlocked(true);
         setPassError(false);
         return;
+      } else {
+        const data = (await res.json()) as { error?: string };
+        setErrorDetail(data.error || "Incorrect credentials");
       }
     } catch {
       // Fallback
@@ -108,6 +120,8 @@ export default function AdminPanel() {
 
     if (PASSCODE && pass === PASSCODE) {
       sessionStorage.setItem(SESSION_KEY, "1");
+      sessionStorage.setItem("tv_admin_name", "TAGVERSE Operations");
+      sessionStorage.setItem("tv_admin_role", "super_admin");
       setUnlocked(true);
       setPassError(false);
     } else {
@@ -126,28 +140,49 @@ export default function AdminPanel() {
             Admin access
           </h1>
           <p className="mt-1 text-sm text-muted-fg">
-            Enter the passcode to manage portfolio, CRM, and studio bookings.
+            Sign in with your admin credentials or master passcode.
           </p>
-          <input
-            type="password"
-            autoFocus
-            value={pass}
-            onChange={(e) => {
-              setPass(e.target.value);
-              setPassError(false);
-            }}
-            placeholder="Passcode"
-            className={`${inputClass} mt-5`}
-          />
+          <div className="mt-5 space-y-3">
+            <div>
+              <label className={labelClass}>Admin Email (Optional)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setPassError(false);
+                }}
+                placeholder="admin@t4gverse.com"
+                className={`${inputClass} mt-1`}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Passcode *</label>
+              <input
+                type="password"
+                autoFocus
+                required
+                value={pass}
+                onChange={(e) => {
+                  setPass(e.target.value);
+                  setPassError(false);
+                }}
+                placeholder="Passcode (default: admin123)"
+                className={`${inputClass} mt-1`}
+              />
+            </div>
+          </div>
           {passError && (
-            <p className="mt-2 text-sm text-red-600">Incorrect passcode.</p>
+            <p className="mt-2 text-sm text-red-600">
+              {errorDetail || "Incorrect passcode or account inactive."}
+            </p>
           )}
           <button
             type="submit"
-            className="mt-4 w-full rounded-full py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="mt-5 w-full rounded-full py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
             style={{ background: "var(--accent-purple)" }}
           >
-            Unlock
+            Unlock Dashboard
           </button>
         </form>
       </div>
@@ -170,6 +205,16 @@ function AdminShell() {
     | "studioShows"
     | "settings"
   >("dashboard");
+  const [adminName, setAdminName] = useState<string>("Admin");
+  const [adminRole, setAdminRole] = useState<string>("super_admin");
+
+  useEffect(() => {
+    const n = sessionStorage.getItem("tv_admin_name");
+    const r = sessionStorage.getItem("tv_admin_role");
+    if (n) setAdminName(n);
+    if (r) setAdminRole(r);
+  }, []);
+
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
@@ -214,12 +259,18 @@ function AdminShell() {
             </TabButton>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-muted-fg hover:border-black/30 hover:text-black self-start sm:self-auto"
-          >
-            Log Out
-          </button>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <div className="text-right hidden sm:block">
+              <p className="text-xs font-medium text-fg">{adminName}</p>
+              <p className="text-[10px] font-mono-g uppercase text-muted-fg">{adminRole.replace("_", " ")}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-muted-fg hover:border-black/30 hover:text-black"
+            >
+              Log Out
+            </button>
+          </div>
         </div>
       </div>
       <div className="mt-6">
@@ -349,6 +400,23 @@ function Dashboard() {
     setForm(emptyForm);
     setEditingId(null);
   }
+  async function seedDefaultProjects() {
+    setBusy(true);
+    setError(null);
+    try {
+      for (const p of DEFAULT_PROJECTS) {
+        const { id: _ignore, ...data } = p;
+        await addDoc(collection(db, "projects"), data);
+      }
+      await load();
+      setMsg("Default portfolio projects seeded into Firestore.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to seed projects.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   function startEdit(p: Project) {
     setEditingId(p.id);
@@ -807,8 +875,16 @@ function Dashboard() {
           {projects === null ? (
             <p className="text-sm text-muted-fg">Loading…</p>
           ) : projects.length === 0 ? (
-            <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">
-              No projects yet. Create your first one on the left.
+            <div className="rounded-[20px] border border-dashed border-line p-8 text-center text-sm text-muted-fg space-y-3">
+              <p>No projects in Firestore yet.</p>
+              <button
+                type="button"
+                onClick={seedDefaultProjects}
+                disabled={busy}
+                className="rounded-full bg-black px-4 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                Seed Default Projects
+              </button>
             </div>
           ) : (
             <ul className="space-y-3">
@@ -967,6 +1043,52 @@ function StudioBookingsManager() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "confirmed" | "rejected">("all");
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newBooking, setNewBooking] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    date: new Date().toISOString().split("T")[0],
+    time: "9 AM – 12 PM",
+    services: ["podcast"] as string[],
+    notes: "",
+  });
+  const [creatingBooking, setCreatingBooking] = useState(false);
+
+  async function handleCreateBooking(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newBooking.name.trim() || !newBooking.email.trim() || !newBooking.phone.trim()) return;
+    setCreatingBooking(true);
+    try {
+      await addDoc(collection(db, "studioBookings"), {
+        name: newBooking.name.trim(),
+        email: newBooking.email.trim(),
+        phone: newBooking.phone.trim(),
+        date: newBooking.date,
+        time: newBooking.time,
+        services: newBooking.services,
+        notes: newBooking.notes.trim(),
+        status: "confirmed",
+        createdAt: new Date().toISOString(),
+      });
+      setShowAddModal(false);
+      setNewBooking({
+        name: "",
+        email: "",
+        phone: "",
+        date: new Date().toISOString().split("T")[0],
+        time: "9 AM – 12 PM",
+        services: ["podcast"],
+        notes: "",
+      });
+      await load();
+    } catch {
+      alert("Failed to create studio booking.");
+    } finally {
+      setCreatingBooking(false);
+    }
+  }
+
 
   const load = useCallback(async () => {
     try {
@@ -1162,17 +1284,26 @@ function StudioBookingsManager() {
           ))}
         </div>
 
-        <button
-          onClick={exportBookingsCSV}
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-black hover:bg-black/5"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          Export CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-black px-3.5 py-1.5 text-xs font-medium text-white hover:opacity-90"
+          >
+            + New Booking
+          </button>
+          <button
+            onClick={exportBookingsCSV}
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-3.5 py-1.5 text-xs font-medium text-black hover:bg-black/5"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Export CSV
+          </button>
+        </div>
       </div>
 
       {filtered.length === 0 && (
@@ -1287,15 +1418,149 @@ function StudioBookingsManager() {
           );
         })}
       </div>
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <form
+            onSubmit={handleCreateBooking}
+            className="w-full max-w-md rounded-[20px] border border-line bg-white p-6 shadow-xl space-y-4"
+          >
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="font-brand text-lg font-medium">Create Studio Booking</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="text-muted-fg hover:text-black"
+              >
+                &times;
+              </button>
+            </div>
+            <div>
+              <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Customer Name *</label>
+              <input
+                required
+                type="text"
+                value={newBooking.name}
+                onChange={(e) => setNewBooking({ ...newBooking, name: e.target.value })}
+                placeholder="e.g. Vikramaditya"
+                className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Email *</label>
+                <input
+                  required
+                  type="email"
+                  value={newBooking.email}
+                  onChange={(e) => setNewBooking({ ...newBooking, email: e.target.value })}
+                  placeholder="name@gmail.com"
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Phone *</label>
+                <input
+                  required
+                  type="tel"
+                  value={newBooking.phone}
+                  onChange={(e) => setNewBooking({ ...newBooking, phone: e.target.value })}
+                  placeholder="+91..."
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Date</label>
+                <input
+                  required
+                  type="date"
+                  value={newBooking.date}
+                  onChange={(e) => setNewBooking({ ...newBooking, date: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                />
+              </div>
+              <div>
+                <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Time Slot</label>
+                <select
+                  value={newBooking.time}
+                  onChange={(e) => setNewBooking({ ...newBooking, time: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+                >
+                  {TIME_SLOTS.map((slot) => (
+                    <option key={slot.label} value={slot.label}>
+                      {slot.icon} {slot.label} ({slot.sub})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-[0.65rem] uppercase tracking-wider text-muted-fg font-medium">Notes / Equipment</label>
+              <textarea
+                rows={2}
+                value={newBooking.notes}
+                onChange={(e) => setNewBooking({ ...newBooking, notes: e.target.value })}
+                placeholder="Special requirements, multi-camera, lighting..."
+                className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-xs outline-none focus:border-[var(--accent-purple)]"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-line">
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-muted-fg hover:text-black"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creatingBooking}
+                className="rounded-full bg-black px-5 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {creatingBooking ? "Saving..." : "Confirm & Save"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
+
+const DEFAULT_STUDIO_SHOWS = [
+  {
+    title: "Building in Public: Zero to Enterprise",
+    guest: "with Tech Founders & VCs",
+    date: "Jul 18",
+    day: "Sat",
+    time: "6:00 PM",
+    venue: "Tagverse Studio, Floor 3",
+    seatsLeft: 18,
+    tag: "Live Recording",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    title: "Voice AI & Agentic Architectures",
+    guest: "with AI Engineers & Practitioners",
+    date: "Jul 25",
+    day: "Sat",
+    time: "5:30 PM",
+    venue: "Tagverse Studio, Main Bay",
+    seatsLeft: 12,
+    tag: "Workshop & Panel",
+    createdAt: new Date().toISOString(),
+  },
+];
 
 function StudioShowsManager() {
   const [shows, setShows] = useState<StudioShow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [editingShow, setEditingShow] = useState<StudioShow | null>(null);
+  const [posterImg, setPosterImg] = useState<string>("");
+  const [compressingPoster, setCompressingPoster] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -1319,19 +1584,33 @@ function StudioShowsManager() {
     try {
       await deleteDoc(doc(db, "studioShows", id));
       await load();
-    } catch (e) {
-      alert("Failed to delete");
+    } catch {
+      alert("Failed to delete show");
     } finally {
       setBusyId(null);
     }
   }
 
-  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
+  async function seedDefaultShows() {
+    setBusyId("seed");
+    try {
+      for (const s of DEFAULT_STUDIO_SHOWS) {
+        await addDoc(collection(db, "studioShows"), s);
+      }
+      await load();
+    } catch {
+      alert("Failed to seed sample shows");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleSaveShow(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setBusyId("add");
+    setBusyId("save");
     try {
       const fd = new FormData(e.currentTarget);
-      const newShow = {
+      const showPayload: Record<string, unknown> = {
         title: fd.get("title") as string,
         guest: fd.get("guest") as string,
         date: fd.get("date") as string,
@@ -1340,13 +1619,23 @@ function StudioShowsManager() {
         venue: fd.get("venue") as string,
         seatsLeft: parseInt(fd.get("seatsLeft") as string, 10),
         tag: fd.get("tag") as string,
-        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
-      await addDoc(collection(db, "studioShows"), newShow);
+      if (posterImg) showPayload.img = posterImg;
+
+      if (editingShow) {
+        await updateDoc(doc(db, "studioShows", editingShow.id), showPayload);
+      } else {
+        showPayload.createdAt = new Date().toISOString();
+        await addDoc(collection(db, "studioShows"), showPayload);
+      }
+
       setAdding(false);
+      setEditingShow(null);
+      setPosterImg("");
       await load();
-    } catch (err) {
-      alert("Failed to add show");
+    } catch {
+      alert("Failed to save show in Firestore");
     } finally {
       setBusyId(null);
     }
@@ -1357,80 +1646,250 @@ function StudioShowsManager() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <button
-          onClick={() => setAdding(!adding)}
-          className="rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
-        >
-          {adding ? "Cancel" : "Add new show"}
-        </button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-brand text-xl font-medium">Studio Live Shows & Sessions</h3>
+          <p className="text-xs text-muted-fg">Schedule and manage upcoming events at Tagverse Studio.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {shows.length === 0 && !adding && (
+            <button
+              onClick={seedDefaultShows}
+              disabled={busyId === "seed"}
+              className="rounded-full border border-line bg-white px-4 py-2 text-xs font-medium text-black hover:border-black"
+            >
+              {busyId === "seed" ? "Seeding..." : "Seed Sample Shows"}
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (adding) {
+                setAdding(false);
+                setEditingShow(null);
+                setPosterImg("");
+              } else {
+                setEditingShow(null);
+                setPosterImg("");
+                setAdding(true);
+              }
+            }}
+            className="rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
+          >
+            {adding ? "Cancel" : "+ Add new show"}
+          </button>
+        </div>
       </div>
 
       {adding && (
-        <form onSubmit={handleAdd} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
-          <h3 className="mb-4 font-brand text-lg font-medium">Add New Show</h3>
+        <form onSubmit={handleSaveShow} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm space-y-4">
+          <h3 className="font-brand text-lg font-medium">
+            {editingShow ? "Edit Show" : "Add New Show"}
+          </h3>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Title (e.g. Building in Public)</label>
-              <input name="title" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Title *</label>
+              <input
+                name="title"
+                required
+                defaultValue={editingShow?.title || ""}
+                placeholder="e.g. Building in Public"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Guest (e.g. with Aarav Mehta)</label>
-              <input name="guest" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Guest *</label>
+              <input
+                name="guest"
+                required
+                defaultValue={editingShow?.guest || ""}
+                placeholder="e.g. with Aarav Mehta"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Date (e.g. Jul 12)</label>
-              <input name="date" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Date (e.g. Jul 12) *</label>
+              <input
+                name="date"
+                required
+                defaultValue={editingShow?.date || ""}
+                placeholder="Jul 12"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Day (e.g. Fri)</label>
-              <input name="day" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Day (e.g. Fri) *</label>
+              <input
+                name="day"
+                required
+                defaultValue={editingShow?.day || ""}
+                placeholder="Fri"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Time (e.g. 7:00 PM)</label>
-              <input name="time" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Time (e.g. 7:00 PM) *</label>
+              <input
+                name="time"
+                required
+                defaultValue={editingShow?.time || ""}
+                placeholder="7:00 PM"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Venue (e.g. Tagverse Studio)</label>
-              <input name="venue" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Venue *</label>
+              <input
+                name="venue"
+                required
+                defaultValue={editingShow?.venue || "Tagverse Studio, Chennai"}
+                placeholder="Tagverse Studio"
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Seats Left (e.g. 21)</label>
-              <input name="seatsLeft" type="number" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Seats Left *</label>
+              <input
+                name="seatsLeft"
+                type="number"
+                required
+                defaultValue={editingShow?.seatsLeft ?? 20}
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-fg">Tag (e.g. Live recording)</label>
-              <input name="tag" required className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg" />
+              <label className="mb-1 block text-xs font-medium text-muted-fg">Tag (e.g. Live recording) *</label>
+              <input
+                name="tag"
+                required
+                defaultValue={editingShow?.tag || "Live Recording"}
+                className="w-full rounded-lg border border-line bg-transparent px-3 py-2 text-sm text-fg"
+              />
             </div>
           </div>
-          <button disabled={busyId === "add"} className="mt-4 rounded-full bg-fg px-6 py-2 text-sm font-medium text-bg disabled:opacity-50">
-            {busyId === "add" ? "Saving..." : "Save Show"}
-          </button>
+
+          {/* Base64 Show Poster Image */}
+          <div className="pt-2 border-t border-line">
+            <label className="mb-1 block text-xs font-medium text-muted-fg">
+              Show Poster (Base64 Database Storage)
+            </label>
+            <div className="flex items-center gap-3">
+              {posterImg ? (
+                <div className="relative h-16 w-24 overflow-hidden rounded-lg border border-line bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={posterImg} alt="Poster" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setPosterImg("")}
+                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white hover:bg-black text-[10px]"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ) : (
+                <div className="grid h-16 w-24 place-items-center rounded-lg border border-dashed border-line bg-muted/40 text-[10px] text-muted-fg">
+                  No poster
+                </div>
+              )}
+              <div>
+                <label className="cursor-pointer rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-fg hover:border-black transition-colors">
+                  {compressingPoster ? "Processing..." : "Upload Poster"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      setCompressingPoster(true);
+                      try {
+                        const b64 = await compressImage(f);
+                        setPosterImg(b64);
+                      } catch (err: unknown) {
+                        alert(err instanceof Error ? err.message : "Image processing failed");
+                      } finally {
+                        setCompressingPoster(false);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                </label>
+                {posterImg && (
+                  <span className="ml-3 font-mono-g text-[10px] text-muted-fg">
+                    ~{approxKB(posterImg)} KB Base64
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-line">
+            <button
+              type="button"
+              onClick={() => {
+                setAdding(false);
+                setEditingShow(null);
+                setPosterImg("");
+              }}
+              className="rounded-full border border-line px-4 py-2 text-sm font-medium text-muted-fg hover:text-fg"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={busyId === "save" || compressingPoster}
+              className="rounded-full bg-fg px-6 py-2 text-sm font-medium text-bg hover:opacity-90 disabled:opacity-50"
+            >
+              {busyId === "save" ? "Saving..." : editingShow ? "Update Show" : "Save Show"}
+            </button>
+          </div>
         </form>
       )}
 
       {shows.length === 0 && !adding && (
         <div className="rounded-[20px] border border-dashed border-line py-16 text-center text-sm text-muted-fg">
-          No shows scheduled yet.
+          No shows scheduled yet. Add your first show above or seed sample shows.
         </div>
       )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {shows.map((s) => (
-          <div key={s.id} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm">
-            <div className="flex items-start justify-between">
-              <div>
+          <div key={s.id} className="rounded-[20px] border border-line bg-surface p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-start justify-between">
                 <span className="mb-2 inline-block rounded-full bg-line px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-wider text-muted-fg">
                   {s.tag}
                 </span>
-                <h3 className="font-brand text-lg font-medium">{s.title}</h3>
-                <p className="text-sm text-muted-fg">{s.guest}</p>
-                <p className="mt-2 text-sm text-muted-fg">
-                  {s.date} ({s.day}) · {s.time}
-                </p>
-                <p className="text-sm text-muted-fg">{s.venue}</p>
-                <p className="mt-1 text-xs font-medium text-[var(--accent-orange)]">{s.seatsLeft} seats left</p>
+                <span className="text-xs font-medium text-[var(--accent-orange)]">
+                  {s.seatsLeft} seats left
+                </span>
               </div>
+
+              {s.img && (
+                <div className="mb-3 h-28 w-full overflow-hidden rounded-xl border border-line bg-muted">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={s.img} alt={s.title} className="h-full w-full object-cover" />
+                </div>
+              )}
+
+              <h3 className="font-brand text-lg font-medium">{s.title}</h3>
+              <p className="text-sm text-muted-fg">{s.guest}</p>
+              <p className="mt-2 text-sm text-muted-fg">
+                {s.date} ({s.day}) · {s.time}
+              </p>
+              <p className="text-sm text-muted-fg">{s.venue}</p>
+            </div>
+
+            <div className="mt-4 flex items-center justify-end gap-2 border-t border-line pt-3">
+              <button
+                onClick={() => {
+                  setEditingShow(s);
+                  setPosterImg(s.img || "");
+                  setAdding(true);
+                }}
+                className="rounded-full border border-line px-3 py-1 text-xs font-medium text-fg hover:border-black"
+              >
+                Edit
+              </button>
               <button
                 onClick={() => onDelete(s.id)}
                 disabled={busyId === s.id}

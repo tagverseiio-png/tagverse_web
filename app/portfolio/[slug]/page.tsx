@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { DEFAULT_PROJECTS } from "@/lib/defaultData";
+import type { Project } from "@/lib/types";
+
+async function getProject(slug: string): Promise<Project | undefined> {
+  try {
+    const snap = await getDocs(collection(db, "projects"));
+    if (!snap.empty) {
+      const match = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }) as Project)
+        .find((p) => (p.slug || p.id).toLowerCase() === slug.toLowerCase());
+      if (match) return match;
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_PROJECTS.find(
+    (p) => (p.slug || p.id).toLowerCase() === slug.toLowerCase()
+  );
+}
 import ProjectDetailButtons, {
   ProjectContactBanner,
 } from "@/components/ProjectDetailButtons";
@@ -19,11 +39,8 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: ProjectPageProps): Metadata {
-  const project = DEFAULT_PROJECTS.find(
-    (p) => (p.slug || p.id).toLowerCase() === params.slug.toLowerCase(),
-  );
-
+export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
+  const project = await getProject(params.slug);
   if (!project) {
     return {
       title: "Case Study — TAGVERSE Portfolio",
@@ -42,11 +59,8 @@ export function generateMetadata({ params }: ProjectPageProps): Metadata {
   };
 }
 
-export default function ProjectDetailPage({ params }: ProjectPageProps) {
-  const project = DEFAULT_PROJECTS.find(
-    (p) => (p.slug || p.id).toLowerCase() === params.slug.toLowerCase(),
-  );
-
+export default async function ProjectDetailPage({ params }: ProjectPageProps) {
+  const project = await getProject(params.slug);
   if (!project) {
     notFound();
   }

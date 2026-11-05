@@ -2,7 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import Reveal from "@/components/Reveal";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { DEFAULT_PRODUCTS, PRODUCT_CATEGORIES } from "@/lib/defaultData";
+import type { Product } from "@/lib/types";
+
+async function getProducts(): Promise<Product[]> {
+  try {
+    const snap = await getDocs(collection(db, "products"));
+    if (!snap.empty) {
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product);
+      docs.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+      return docs;
+    }
+  } catch {
+    // fallback
+  }
+  return DEFAULT_PRODUCTS;
+}
 
 export const metadata: Metadata = {
   title: "Products — Tagverse | Software Platforms & Enterprise SaaS",
@@ -93,7 +110,8 @@ const productSchema = {
   })),
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const allProducts = await getProducts();
   return (
     <main className="overflow-x-clip">
       <script
@@ -127,7 +145,7 @@ export default function ProductsPage() {
           {/* Grouped Products by Category */}
           <div className="space-y-20">
             {PRODUCT_CATEGORIES.map((cat) => {
-              const catProducts = DEFAULT_PRODUCTS.filter((p) => p.category === cat);
+              const catProducts = allProducts.filter((p) => p.category === cat);
               const anchor = categoryToAnchor[cat] || "products";
 
               return (

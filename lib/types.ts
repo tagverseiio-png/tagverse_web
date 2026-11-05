@@ -143,6 +143,7 @@ export type StudioShow = {
   venue: string;
   seatsLeft: number;
   tag: string;
+  img?: string;
   createdAt: string;
 };
 
@@ -159,8 +160,8 @@ export type AdminUser = {
   active: boolean;
   createdAt: string;
   lastLogin?: string;
+  passcode?: string;
 };
-
 /**
  * Integration & Webhook Settings
  */
