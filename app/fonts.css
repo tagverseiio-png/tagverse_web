@@ -1,0 +1,29 @@
+/* Giga brand fonts — self-hosted from the real site */
+
+/* Giga Sans Display */
+@font-face { font-family: gigaSansDisplay; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/49d2bf57e074bd26-s.p.woff2) format("woff2"); }
+@font-face { font-family: gigaSansDisplay; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/42cecd37c3b437ce-s.p.woff2) format("woff2"); }
+@font-face { font-family: gigaSansDisplay; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/95ec8842a4471cb6-s.p.woff2) format("woff2"); }
+
+/* Giga Sans Text */
+@font-face { font-family: gigaSansText; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/850c89bbb67bd9d9-s.p.woff2) format("woff2"); }
+@font-face { font-family: gigaSansText; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/7fd69480b82f84c7-s.p.woff2) format("woff2"); }
+@font-face { font-family: gigaSansText; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/6eee910a99ad2f1a-s.p.woff2) format("woff2"); }
+
+/* Emilio Display (light serif display) */
+@font-face { font-family: emilioDisplay; font-style: normal; font-weight: 200; font-display: swap; src: url(/fonts/02a339f9d58fc1ac-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: italic; font-weight: 200; font-display: swap; src: url(/fonts/e8e4b49018763954-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: normal; font-weight: 300; font-display: swap; src: url(/fonts/156062260b8ead07-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: italic; font-weight: 300; font-display: swap; src: url(/fonts/9424dc52e5239ffd-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/e2b9cbdc8ac29494-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: italic; font-weight: 400; font-display: swap; src: url(/fonts/8513234e7ac81cdd-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/3d5b794c2cfd67c5-s.p.woff2) format("woff2"); }
+@font-face { font-family: emilioDisplay; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/5951863d50dca90f-s.p.woff2) format("woff2"); }
+
+/* Source Serif 4 */
+@font-face { font-family: sourceSerif4; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/83e7eea712366c5f-s.p.woff2) format("woff2"); }
+@font-face { font-family: sourceSerif4; font-style: italic; font-weight: 400; font-display: swap; src: url(/fonts/59e68e217e191110-s.p.woff2) format("woff2"); }
+@font-face { font-family: sourceSerif4; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/7fb32f8592a9a0d9-s.p.woff2) format("woff2"); }
+
+/* Geist Mono */
+@font-face { font-family: geistMono; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/190ce5722df8cd22-s.p.woff2) format("woff2"); }

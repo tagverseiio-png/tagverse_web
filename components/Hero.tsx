@@ -1,0 +1,80 @@
+"use client";
+
+import { useMedia } from "./MediaProvider";
+import { useContentResolver } from "./ContentProvider";
+import { useContactModal } from "./ContactModal";
+
+function Arrow() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  );
+}
+
+export default function Hero() {
+  const video = useMedia("hero.video");
+  const c = useContentResolver();
+  const { open } = useContactModal();
+  return (
+    <section className="relative min-h-[100svh] overflow-hidden bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
+      {/* ambient video backdrop */}
+      <video
+        key={video}
+        className="absolute inset-0 h-full w-full object-cover opacity-40 dark:opacity-30"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="none"
+      >
+        <source src={video} type="video/mp4" />
+      </video>
+      {/* gradient overlays — mirrors footer but white / dark */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white dark:from-black/75 dark:via-black/60 dark:to-black transition-colors duration-300" />
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-white dark:to-black transition-colors duration-300" />
+
+      <div className="container-hero relative flex min-h-[100svh] flex-col items-center justify-center pb-28 pt-32 text-center">
+        <a
+          href="#hallucination"
+          className="animate-hero-rise group inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-black/5 dark:border-white/15 dark:bg-white/5 py-1.5 pl-2 pr-4 text-[13px] font-medium backdrop-blur-md transition-colors hover:bg-black/10 dark:hover:bg-white/10 dark:text-white"
+          style={{ animationDelay: "60ms" }}
+        >
+          <span className="rounded-full bg-black px-2.5 py-0.5 text-[11px] font-semibold text-white dark:bg-white dark:text-black">
+            {c("hero.badge")}
+          </span>
+          {c("hero.badgeText")}
+          <Arrow />
+        </a>
+
+        <h1
+          className="animate-hero-rise mt-7 font-display text-hero font-light leading-[1.2] tracking-display min-[810px]:whitespace-nowrap"
+          style={{ animationDelay: "120ms" }}
+        >
+          {c("hero.title1")}
+          <br />
+          <span className="italic text-black/40 dark:text-white/40">{c("hero.title2")}</span>
+        </h1>
+
+        <p
+          className="animate-hero-rise mx-auto mt-4 max-w-xl text-base leading-8 text-black/60 dark:text-white/60"
+          style={{ animationDelay: "200ms" }}
+        >
+          {c("hero.subtitle")}
+        </p>
+
+        <div
+          className="animate-hero-rise mt-7"
+          style={{ animationDelay: "280ms" }}
+        >
+          <button
+            onClick={open}
+            className="inline-flex items-center justify-center rounded-full bg-black px-6 py-3 text-sm font-medium text-white dark:bg-white dark:text-black transition-transform hover:scale-[1.02]"
+          >
+            {c("hero.cta")}
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}

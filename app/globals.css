@@ -1,0 +1,435 @@
+@import "./fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* surfaces */
+  --bg: oklch(100% 0 0);
+  --fg: #111111;
+  --muted: oklch(96.5% 0 0);
+  --muted-fg: oklch(45% 0 0);
+  --surface: oklch(98.5% 0 0);
+  --surface-raised: oklch(96% 0 0);
+  --surface-elevated: oklch(96% 0 0);
+  --border: oklch(0% 0 0 / 0.1);
+
+  /* brand accents in light mode */
+  --accent-purple: #662ECA;
+  --accent-purple-bright: #7B3FE4;
+  --accent-purple-soft: #662ECA;
+  --accent-purple-muted: #f0eafc;
+  --accent-violet: #662ECA;
+  --accent-orange: #662ECA;
+  --accent-orange-bright: #662ECA;
+  --accent-orange-soft: #8b5cf6;
+  --accent-blue: #662ECA;
+  --accent-lime: #8b5cf6;
+  --accent-teal: #662ECA;
+
+  /* page tints */
+  --page-lp: #f8fafc;
+  --page-voice: #faf7fd;
+  --surface-voice: #f3eefb;
+  --voice-waveform-violet: #6640ff;
+  --omni-surface: #f1f5f9;
+
+  /* buttons */
+  --button-bg: #131313;
+  --button-bg-hover: #000;
+
+  /* fonts */
+  --font-display: emilioDisplay, "emilioDisplay Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-brand-display: gigaSansDisplay, "gigaSansDisplay Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-text: gigaSansText, "gigaSansText Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: sourceSerif4, "sourceSerif4 Fallback", Georgia, serif;
+  --font-mono: geistMono, "geistMono Fallback", ui-monospace, monospace;
+
+  /* type scale */
+  --text-hero: max(2.75rem, 4.6vw);
+  --text-section-h2: clamp(2rem, 4.3vw, 2.75rem);
+  --text-headline: clamp(2.5rem, 4vw, 3rem);
+  --text-product-eyebrow: clamp(1.5rem, 4.7vw, 1.875rem);
+  --text-section-intro: clamp(0.875rem, 1vw + 0.5rem, 1rem);
+  --text-canvas-title: 2.1875rem;
+  --text-cta: 3.75rem;
+  --tracking-display: -0.03em;
+
+  /* radii */
+  --radius-image: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* surfaces in dark mode */
+  --bg: #000000;
+  --fg: #f5f5f7;
+  --muted: #0d0d10;
+  --muted-fg: #94949e;
+  --surface: #070709;
+  --surface-raised: #121217;
+  --surface-elevated: #1a1a22;
+  --border: rgba(255, 255, 255, 0.12);
+
+  /* brand accents in dark mode */
+  --accent-purple-soft: #BBA0E9;
+  --page-lp: #030a14;
+  --page-voice: #0f0310;
+  --surface-voice: #140f1e;
+  --omni-surface: #071427;
+
+  /* buttons in dark mode */
+  --button-bg: #ffffff;
+  --button-bg-hover: #e5e5e5;
+}
+
+/* Smooth background inversion for light sections in dark mode */
+.dark section.bg-white,
+.dark main.bg-white {
+  background-color: #050507 !important;
+  color: #f5f5f7;
+}
+
+.dark section.bg-white h1,
+.dark section.bg-white h2,
+.dark section.bg-white h3,
+.dark section.bg-white p.text-black {
+  color: #f5f5f7;
+}
+
+.dark section.bg-white div.bg-white {
+  background-color: #0b0b10 !important;
+  color: #f5f5f7;
+}
+
+/* ===== LIGHT MODE COMPREHENSIVE OVERRIDES FOR ACADEMY & DARK SECTIONS ===== */
+html:not(.dark) .academy-theme,
+html:not(.dark) .dark-adaptive,
+html:not(.dark) main.bg-black {
+  background-color: #fcfcfd !important;
+  color: #0f172a !important;
+}
+
+/* Headings and primary text in light mode */
+html:not(.dark) .academy-theme .text-white,
+html:not(.dark) .dark-adaptive .text-white,
+html:not(.dark) main.bg-black .text-white {
+  color: #09090b !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/95,
+html:not(.dark) .academy-theme .text-white\/90,
+html:not(.dark) .dark-adaptive .text-white\/90,
+html:not(.dark) main.bg-black .text-white\/90 {
+  color: #18181b !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/85,
+html:not(.dark) .academy-theme .text-white\/80,
+html:not(.dark) .dark-adaptive .text-white\/80,
+html:not(.dark) main.bg-black .text-white\/80 {
+  color: #27272a !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/75,
+html:not(.dark) .academy-theme .text-white\/70,
+html:not(.dark) .academy-theme .text-white\/65,
+html:not(.dark) .dark-adaptive .text-white\/70,
+html:not(.dark) main.bg-black .text-white\/70 {
+  color: #3f3f46 !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/60,
+html:not(.dark) .academy-theme .text-white\/55,
+html:not(.dark) .dark-adaptive .text-white\/60,
+html:not(.dark) main.bg-black .text-white\/60 {
+  color: #52525b !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/50,
+html:not(.dark) .academy-theme .text-white\/45,
+html:not(.dark) .academy-theme .text-white\/40,
+html:not(.dark) .dark-adaptive .text-white\/50,
+html:not(.dark) main.bg-black .text-white\/50 {
+  color: #71717a !important;
+}
+
+html:not(.dark) .academy-theme .text-white\/35,
+html:not(.dark) .academy-theme .text-white\/30,
+html:not(.dark) .academy-theme .text-white\/25,
+html:not(.dark) .academy-theme .text-white\/20,
+html:not(.dark) .dark-adaptive .text-white\/30,
+html:not(.dark) main.bg-black .text-white\/30 {
+  color: #a1a1aa !important;
+}
+
+/* Borders in light mode */
+html:not(.dark) .academy-theme .border-white\/10,
+html:not(.dark) .academy-theme .border-white\/15,
+html:not(.dark) .academy-theme .border-white\/20,
+html:not(.dark) .academy-theme .border-white\/25,
+html:not(.dark) .academy-theme .border-white\/30,
+html:not(.dark) .dark-adaptive .border-white\/10,
+html:not(.dark) .dark-adaptive .border-white\/15,
+html:not(.dark) .dark-adaptive .border-white\/20,
+html:not(.dark) main.bg-black .border-white\/10,
+html:not(.dark) main.bg-black .border-white\/15,
+html:not(.dark) main.bg-black .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Card surfaces in light mode */
+html:not(.dark) .academy-theme .bg-white\/5,
+html:not(.dark) .academy-theme .bg-white\/10,
+html:not(.dark) .academy-theme .bg-white\/\[0\.01\],
+html:not(.dark) .academy-theme .bg-white\/\[0\.02\],
+html:not(.dark) .academy-theme .bg-white\/\[0\.03\],
+html:not(.dark) .academy-theme .bg-white\/\[0\.04\],
+html:not(.dark) .dark-adaptive .bg-white\/5,
+html:not(.dark) .dark-adaptive .bg-white\/10,
+html:not(.dark) .dark-adaptive .bg-white\/\[0\.01\],
+html:not(.dark) .dark-adaptive .bg-white\/\[0\.02\],
+html:not(.dark) .dark-adaptive .bg-white\/\[0\.03\],
+html:not(.dark) main.bg-black .bg-white\/5,
+html:not(.dark) main.bg-black .bg-white\/10,
+html:not(.dark) main.bg-black .bg-white\/\[0\.02\],
+html:not(.dark) main.bg-black .bg-white\/\[0\.03\] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+html:not(.dark) .academy-theme .hover\:bg-white\/5:hover,
+html:not(.dark) .academy-theme .hover\:bg-white\/10:hover,
+html:not(.dark) .dark-adaptive .hover\:bg-white\/5:hover,
+html:not(.dark) .dark-adaptive .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Sections with hardcoded black backgrounds in light mode */
+html:not(.dark) .academy-theme section.bg-black,
+html:not(.dark) .dark-adaptive section.bg-black {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html:not(.dark) .academy-theme .from-black,
+html:not(.dark) .academy-theme .via-black,
+html:not(.dark) .academy-theme .to-black,
+html:not(.dark) .dark-adaptive .from-black,
+html:not(.dark) .dark-adaptive .via-black,
+html:not(.dark) .dark-adaptive .to-black {
+  --tw-gradient-from: transparent !important;
+  --tw-gradient-to: transparent !important;
+  --tw-gradient-stops: transparent !important;
+}
+
+/* Secondary frosted navigation bars in light mode */
+html:not(.dark) .academy-theme .bg-black\/80,
+html:not(.dark) .academy-theme .bg-black\/90,
+html:not(.dark) .dark-adaptive .bg-black\/80,
+html:not(.dark) .dark-adaptive .bg-black\/90 {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+/* Primary buttons in light mode */
+html:not(.dark) .academy-theme button.bg-white,
+html:not(.dark) .academy-theme a.bg-white,
+html:not(.dark) .dark-adaptive button.bg-white,
+html:not(.dark) .dark-adaptive a.bg-white {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+}
+html:not(.dark) .academy-theme button.bg-white:hover,
+html:not(.dark) .academy-theme a.bg-white:hover,
+html:not(.dark) .dark-adaptive button.bg-white:hover,
+html:not(.dark) .dark-adaptive a.bg-white:hover {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+html:not(.dark) .academy-theme button.bg-white *,
+html:not(.dark) .academy-theme a.bg-white *,
+html:not(.dark) .dark-adaptive button.bg-white *,
+html:not(.dark) .dark-adaptive a.bg-white * {
+  color: #ffffff !important;
+}
+
+/* Secondary ghost buttons with border in light mode */
+html:not(.dark) .academy-theme button.border-white\/20,
+html:not(.dark) .academy-theme a.border-white\/20,
+html:not(.dark) .dark-adaptive button.border-white\/20,
+html:not(.dark) .dark-adaptive a.border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.14) !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+html:not(.dark) .academy-theme button.border-white\/20:hover,
+html:not(.dark) .academy-theme a.border-white\/20:hover,
+html:not(.dark) .dark-adaptive button.border-white\/20:hover,
+html:not(.dark) .dark-adaptive a.border-white\/20:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Form inputs in light mode */
+html:not(.dark) .academy-theme input,
+html:not(.dark) .academy-theme textarea,
+html:not(.dark) .academy-theme select,
+html:not(.dark) .dark-adaptive input,
+html:not(.dark) .dark-adaptive textarea,
+html:not(.dark) .dark-adaptive select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.14) !important;
+}
+html:not(.dark) .academy-theme input::placeholder,
+html:not(.dark) .academy-theme textarea::placeholder,
+html:not(.dark) .dark-adaptive input::placeholder,
+html:not(.dark) .dark-adaptive textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Ambient glow opacity in light mode */
+html:not(.dark) .academy-theme [class*="blur-[140px]"],
+html:not(.dark) .academy-theme [class*="blur-[120px]"],
+html:not(.dark) .dark-adaptive [class*="blur-[140px]"],
+html:not(.dark) .dark-adaptive [class*="blur-[120px]"] {
+  opacity: 0.35 !important;
+}
+
+/* Soft purple text in light mode */
+html:not(.dark) .text-\[var\(--accent-purple-soft\)\],
+html:not(.dark) .academy-theme .text-\[var\(--accent-purple-soft\)\],
+html:not(.dark) .dark-adaptive .text-\[var\(--accent-purple-soft\)\],
+html:not(.dark) .text-purple-400 {
+  color: #662ECA !important;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-text);
+}
+
+@layer base {
+  ::selection {
+    background: var(--accent-purple);
+    color: #fff;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full px-5 sm:px-6 lg:px-8;
+    max-width: 1240px;
+  }
+  .container-canvas {
+    @apply mx-auto w-full px-5 sm:px-6 lg:px-8;
+    max-width: 1352px;
+  }
+  .container-hero {
+    @apply mx-auto w-full px-5 sm:px-6 lg:px-8;
+    max-width: 1400px;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-brand {
+    font-family: var(--font-brand-display);
+  }
+  .font-serif-4 {
+    font-family: var(--font-serif);
+  }
+  .font-mono-g {
+    font-family: var(--font-mono);
+  }
+  .font-orbitron {
+    font-family: var(--font-orbitron), "Orbitron", sans-serif;
+  }
+
+  .eyebrow {
+    @apply font-mono-g text-[0.6875rem] font-normal uppercase tracking-[0.16em];
+    color: var(--muted-fg);
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-5 py-2.5 text-sm font-medium text-white transition-colors;
+    background: var(--button-bg);
+  }
+  .btn-primary:hover {
+    background: var(--button-bg-hover);
+  }
+  .btn-light {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-white px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90;
+    color: var(--fg);
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border px-5 py-2.5 text-sm font-medium transition-colors;
+    border-color: var(--border);
+  }
+  .btn-outline:hover {
+    background: var(--surface);
+  }
+}
+
+/* ===== keyframes (mirrored from giga.ai) ===== */
+@keyframes hero-rise {
+  0% { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-parallax-drift {
+  0% { transform: translate(0); }
+  to { transform: translateY(-200px); }
+}
+@keyframes page-reveal {
+  0% { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes marquee {
+  0% { transform: translate(0); }
+  to { transform: translateX(var(--marquee-shift, -50%)); }
+}
+@keyframes shimmer-sweep {
+  0% { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 oklch(100% 0 0 / 0.6); }
+  70% { box-shadow: 0 0 0 6px oklch(100% 0 0 / 0); }
+  to { box-shadow: 0 0 0 0 oklch(100% 0 0 / 0); }
+}
+
+.animate-hero-rise { animation: hero-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-marquee { animation: marquee 38s linear infinite; }
+
+/* scroll-reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
